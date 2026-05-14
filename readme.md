@@ -60,7 +60,7 @@
   <img src="./img/wxgroup.jpg" width="280" alt="微信交流群"/>
 </div>
 
-## 打赏支持
+## 请二刺螈本螈喝咖啡
 
 <div style="text-align: center;">
   <table>
