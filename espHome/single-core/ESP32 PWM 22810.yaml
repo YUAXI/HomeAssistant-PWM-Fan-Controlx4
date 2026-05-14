@@ -1,0 +1,181 @@
+esphome:
+  name: esp32pwm22810
+  friendly_name: ESP32 PWM 22810
+
+esp32:
+  board: esp32dev
+  variant: ESP32 
+  framework:
+    type: esp-idf
+    # 针对单核芯片的 SDK 关键优化配置
+    sdkconfig_options:
+      CONFIG_FREERTOS_UNICORE: "y"  # 强制启用单核模式
+      CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT: "y"
+
+logger:
+  level: INFO
+
+api:
+  encryption:
+    key: "LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk="
+
+ota:
+  - platform: esphome
+    password: "4283bb50a8cd66774ce91d2c9d412cf2"
+
+wifi:
+  ap:
+    ssid: "ESP32-Fan-22810"
+    password: "" 
+
+captive_portal:
+
+output:
+  - platform: ledc
+    pin: GPIO16
+    id: fan1_pwm
+    frequency: 25000Hz
+  - platform: ledc
+    pin: GPIO17
+    id: fan2_pwm
+    frequency: 25000Hz
+  - platform: ledc
+    pin: GPIO18
+    id: fan3_pwm
+    frequency: 25000Hz
+  - platform: ledc
+    pin: GPIO19
+    id: fan4_pwm
+    frequency: 25000Hz
+
+switch:
+  - platform: gpio
+    pin: GPIO21
+    id: fan1_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: GPIO22
+    id: fan2_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: GPIO23
+    id: fan3_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: GPIO13
+    id: fan4_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+
+sensor:
+  - platform: pulse_counter
+    pin:
+      number: GPIO32
+      mode: INPUT_PULLUP
+    name: "风扇 1 转速"
+    id: fan1_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO33
+      mode: INPUT_PULLUP
+    name: "风扇 2 转速"
+    id: fan2_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO25
+      mode: INPUT_PULLUP
+    name: "风扇 3 转速"
+    id: fan3_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO26
+      mode: INPUT_PULLUP
+    name: "风扇 4 转速"
+    id: fan4_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+fan:
+  - platform: speed
+    output: fan1_pwm
+    name: "风扇 1"
+    speed_count: 100
+    on_turn_on:
+      - then:
+          - output.set_level: {id: fan1_pwm, level: 20%}
+          - switch.turn_on: fan1_pwr
+    on_turn_off:
+      - then:
+          - output.set_level: {id: fan1_pwm, level: 0%}
+          - delay: 200ms
+          - switch.turn_off: fan1_pwr
+
+  - platform: speed
+    output: fan2_pwm
+    name: "风扇 2"
+    speed_count: 100
+    on_turn_on:
+      - then:
+          - output.set_level: {id: fan2_pwm, level: 20%}
+          - switch.turn_on: fan2_pwr
+    on_turn_off:
+      - then:
+          - output.set_level: {id: fan2_pwm, level: 0%}
+          - delay: 200ms
+          - switch.turn_off: fan2_pwr
+
+  - platform: speed
+    output: fan3_pwm
+    name: "风扇 3"
+    speed_count: 100
+    on_turn_on:
+      - then:
+          - output.set_level: {id: fan3_pwm, level: 20%}
+          - switch.turn_on: fan3_pwr
+    on_turn_off:
+      - then:
+          - output.set_level: {id: fan3_pwm, level: 0%}
+          - delay: 200ms
+          - switch.turn_off: fan3_pwr
+
+  - platform: speed
+    output: fan4_pwm
+    name: "风扇 4"
+    speed_count: 100
+    on_turn_on:
+      - then:
+          - output.set_level: {id: fan4_pwm, level: 20%}
+          - switch.turn_on: fan4_pwr
+    on_turn_off:
+      - then:
+          - output.set_level: {id: fan4_pwm, level: 0%}
+          - delay: 200ms
+          - switch.turn_off: fan4_pwr

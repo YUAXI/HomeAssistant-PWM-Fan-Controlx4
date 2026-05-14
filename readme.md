@@ -17,20 +17,21 @@
   <table>
     <tr>
       <td width="33%" style="padding: 10px;">
-        <img src="./img/up.jpg" width="250" alt="实物图顶部"/>
-        <!-- <p><small>实物图顶部</small></p> -->
+        <img src="./img/pcb.jpg" width="450" alt="实物图"/>
+        <!-- <p><small>实物图</small></p> -->
       </td>
       <td width="33%" style="padding: 10px;">
-        <img src="./img/down.jpg" width="250" alt="实物图底部"/>
-        <!-- <p><small>实物图底部</small></p> -->
+        <img src="./img/test.jpeg" width="450" alt="测试图"/>
+        <!-- <p><small>测试图</small></p> -->
       </td>
       <td width="33%" style="padding: 10px;">
-        <img src="./img/3d.jpg" width="250" alt="带外壳"/>
-        <!-- <p><small>带外壳</small></p> -->
+        <img src="./img/status.jpeg" width="250" alt="转速曲线图"/>
+        <!-- <p><small>转速曲线图</small></p> -->
       </td>
     </tr>
   </table>
 </div>
+
 
 ## 控制器硬件实现原理
 
