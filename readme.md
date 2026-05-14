@@ -7,7 +7,7 @@
 ## 主要功能
 
 - 通过 ESPHome 集成 HomeAssistant 控制
-- 支持 4 路风扇独立 PWM 调速
+- 支持 4 路风扇独立 PWM 调速 转速显示
 - 可通过 HomeAssistant 自动化联动温湿度传感器，实现环境温度/湿度驱动风速调节
 - 可通过 SSH 读取设备 CPU 温度，并结合 HomeAssistant 自动化实现风速控制
 
