@@ -128,54 +128,46 @@ fan:
     output: fan1_pwm
     name: "风扇 1"
     speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       - then:
-          - output.set_level: {id: fan1_pwm, level: 20%}
           - switch.turn_on: fan1_pwr
     on_turn_off:
       - then:
-          - output.set_level: {id: fan1_pwm, level: 0%}
-          - delay: 200ms
           - switch.turn_off: fan1_pwr
 
   - platform: speed
     output: fan2_pwm
     name: "风扇 2"
     speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       - then:
-          - output.set_level: {id: fan2_pwm, level: 20%}
           - switch.turn_on: fan2_pwr
     on_turn_off:
       - then:
-          - output.set_level: {id: fan2_pwm, level: 0%}
-          - delay: 200ms
           - switch.turn_off: fan2_pwr
 
   - platform: speed
     output: fan3_pwm
     name: "风扇 3"
     speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       - then:
-          - output.set_level: {id: fan3_pwm, level: 20%}
           - switch.turn_on: fan3_pwr
     on_turn_off:
       - then:
-          - output.set_level: {id: fan3_pwm, level: 0%}
-          - delay: 200ms
           - switch.turn_off: fan3_pwr
 
   - platform: speed
     output: fan4_pwm
     name: "风扇 4"
     speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       - then:
-          - output.set_level: {id: fan4_pwm, level: 20%}
           - switch.turn_on: fan4_pwr
     on_turn_off:
       - then:
-          - output.set_level: {id: fan4_pwm, level: 0%}
-          - delay: 200ms
           - switch.turn_off: fan4_pwr
