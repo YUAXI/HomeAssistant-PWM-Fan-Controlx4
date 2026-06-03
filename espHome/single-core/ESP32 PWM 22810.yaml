@@ -74,7 +74,7 @@ sensor:
   - platform: pulse_counter
     pin:
       number: GPIO32
-      mode: INPUT_PULLUP
+      mode: INPUT 
     name: "风扇 1 转速"
     id: fan1_rpm
     unit_of_measurement: "RPM"
@@ -87,7 +87,7 @@ sensor:
   - platform: pulse_counter
     pin:
       number: GPIO33
-      mode: INPUT_PULLUP
+      mode: INPUT  
     name: "风扇 2 转速"
     id: fan2_rpm
     unit_of_measurement: "RPM"
@@ -100,7 +100,7 @@ sensor:
   - platform: pulse_counter
     pin:
       number: GPIO25
-      mode: INPUT_PULLUP
+      mode: INPUT 
     name: "风扇 3 转速"
     id: fan3_rpm
     unit_of_measurement: "RPM"
@@ -113,7 +113,7 @@ sensor:
   - platform: pulse_counter
     pin:
       number: GPIO26
-      mode: INPUT_PULLUP
+      mode: INPUT 
     name: "风扇 4 转速"
     id: fan4_rpm
     unit_of_measurement: "RPM"
