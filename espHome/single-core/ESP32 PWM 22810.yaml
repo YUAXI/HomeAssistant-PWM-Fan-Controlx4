@@ -7,9 +7,8 @@ esp32:
   variant: ESP32 
   framework:
     type: esp-idf
-    # 针对单核芯片的 SDK 关键优化配置
     sdkconfig_options:
-      CONFIG_FREERTOS_UNICORE: "y"  # 强制启用单核模式
+      CONFIG_FREERTOS_UNICORE: "y"
       CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT: "y"
 
 logger:
@@ -29,6 +28,9 @@ wifi:
     password: "" 
 
 captive_portal:
+
+web_server:
+  port: 80
 
 output:
   - platform: ledc
@@ -122,6 +124,31 @@ sensor:
     internal_filter: 13us
     filters:
       - multiply: 0.5
+
+  - platform: uptime
+    name: "设备运行时间"
+    entity_category: "diagnostic"
+    id: uptime_sensor
+    update_interval: 60s
+
+  - platform: wifi_signal
+    name: "Wi-Fi 信号强度"
+    entity_category: "diagnostic"
+    id: wifi_rssi
+    update_interval: 60s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "设备 IP 地址"
+      entity_category: "diagnostic"
+    ssid:
+      name: "连接 Wi-Fi SSID"
+      entity_category: "diagnostic"
+
+  - platform: version
+    name: "ESPHome 版本"
+    entity_category: "diagnostic"
 
 fan:
   - platform: speed

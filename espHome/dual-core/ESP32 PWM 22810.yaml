@@ -4,8 +4,12 @@ esphome:
 
 esp32:
   board: esp32dev
+  variant: ESP32 
   framework:
     type: esp-idf
+    sdkconfig_options:
+    # CONFIG_FREERTOS_UNICORE: "y"，强制单核运行
+      CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT: "y"
 
 logger:
   level: INFO
@@ -25,27 +29,26 @@ wifi:
 
 captive_portal:
 
+web_server:
+  port: 80
+
 output:
   - platform: ledc
     pin: GPIO16
     id: fan1_pwm
     frequency: 25000Hz
-    inverted: false
   - platform: ledc
     pin: GPIO17
     id: fan2_pwm
     frequency: 25000Hz
-    inverted: false
   - platform: ledc
     pin: GPIO18
     id: fan3_pwm
     frequency: 25000Hz
-    inverted: false
   - platform: ledc
     pin: GPIO19
     id: fan4_pwm
     frequency: 25000Hz
-    inverted: false
 
 switch:
   - platform: gpio
@@ -73,14 +76,12 @@ sensor:
   - platform: pulse_counter
     pin:
       number: GPIO32
-      mode: INPUT
+      mode: INPUT 
     name: "风扇 1 转速"
     id: fan1_rpm
     unit_of_measurement: "RPM"
     update_interval: 4s
-    count_mode:
-      rising_edge: DISABLE
-      falling_edge: INCREMENT
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
     internal_filter: 13us
     filters:
       - multiply: 0.5
@@ -88,7 +89,7 @@ sensor:
   - platform: pulse_counter
     pin:
       number: GPIO33
-      mode: INPUT
+      mode: INPUT  
     name: "风扇 2 转速"
     id: fan2_rpm
     unit_of_measurement: "RPM"
@@ -101,7 +102,7 @@ sensor:
   - platform: pulse_counter
     pin:
       number: GPIO25
-      mode: INPUT
+      mode: INPUT 
     name: "风扇 3 转速"
     id: fan3_rpm
     unit_of_measurement: "RPM"
@@ -114,7 +115,7 @@ sensor:
   - platform: pulse_counter
     pin:
       number: GPIO26
-      mode: INPUT
+      mode: INPUT 
     name: "风扇 4 转速"
     id: fan4_rpm
     unit_of_measurement: "RPM"
@@ -124,59 +125,76 @@ sensor:
     filters:
       - multiply: 0.5
 
+  - platform: uptime
+    name: "设备运行时间"
+    entity_category: "diagnostic"
+    id: uptime_sensor
+    update_interval: 60s
+
+  - platform: wifi_signal
+    name: "Wi-Fi 信号强度"
+    entity_category: "diagnostic"
+    id: wifi_rssi
+    update_interval: 60s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "设备 IP 地址"
+      entity_category: "diagnostic"
+    ssid:
+      name: "连接 Wi-Fi SSID"
+      entity_category: "diagnostic"
+
+  - platform: version
+    name: "ESPHome 版本"
+    entity_category: "diagnostic"
+
 fan:
   - platform: speed
     output: fan1_pwm
     name: "风扇 1"
     speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       - then:
-          - output.set_level: {id: fan1_pwm, level: 20%} 
           - switch.turn_on: fan1_pwr
     on_turn_off:
       - then:
-          - output.set_level: {id: fan1_pwm, level: 0%} 
-          - delay: 200ms                            
-          - switch.turn_off: fan1_pwr                 
+          - switch.turn_off: fan1_pwr
 
   - platform: speed
     output: fan2_pwm
     name: "风扇 2"
     speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       - then:
-          - output.set_level: {id: fan2_pwm, level: 20%}
           - switch.turn_on: fan2_pwr
     on_turn_off:
       - then:
-          - output.set_level: {id: fan2_pwm, level: 0%}
-          - delay: 200ms
           - switch.turn_off: fan2_pwr
 
   - platform: speed
     output: fan3_pwm
     name: "风扇 3"
     speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       - then:
-          - output.set_level: {id: fan3_pwm, level: 20%}
           - switch.turn_on: fan3_pwr
     on_turn_off:
       - then:
-          - output.set_level: {id: fan3_pwm, level: 0%}
-          - delay: 200ms
           - switch.turn_off: fan3_pwr
 
   - platform: speed
     output: fan4_pwm
     name: "风扇 4"
     speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
       - then:
-          - output.set_level: {id: fan4_pwm, level: 20%}
           - switch.turn_on: fan4_pwr
     on_turn_off:
       - then:
-          - output.set_level: {id: fan4_pwm, level: 0%}
-          - delay: 200ms
           - switch.turn_off: fan4_pwr
