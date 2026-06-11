@@ -5,10 +5,18 @@
  HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器项目。该控制器支持接入 Home Assistant，实现 4 路风扇的独立调速与智能联动控制。
   `key: "LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk="`
 
+## 更新日志
+
+### [2026.06.11]
+- **✨ 新增 Web 界面控制功能**：集成 `web_server` 组件，支持在局域网内通过浏览器（输入设备 IP）直接对 4 路风扇进行可视化开关与 1-100% 滑块调速，并开放了标准的 HTTP REST API 控制接口。
+- **🔍 新增诊断实体**：引入 `uptime`、`wifi_signal`、`wifi_info` 及 `version` 平台。在 Home Assistant 中可自动归类生成设备运行时间、Wi-Fi 信号强度、局域网 IP 地址以及 ESPHome 固件版本等诊断型实体，方便日常维护与状态监控。
+
 ## 主要功能
 
 - 通过 ESPHome 集成 HomeAssistant 控制
-- 支持 4 路风扇独立 PWM 调速 转速显示
+- **支持 Web 网页端/HTTP API 直接控制与百分比调速**
+- 支持 4 路风扇独立 PWM 调速及实时转速显示
+- **内置完善的硬件与系统诊断实体**（在线时间、信号强度、IP等）
 - 可通过 HomeAssistant 自动化联动温湿度传感器，实现环境温度/湿度驱动风速调节
 - 可通过 SSH 读取设备 CPU 温度，并结合 HomeAssistant 自动化实现风速控制
 
@@ -19,16 +27,13 @@
     <tr>
       <td width="33%" style="padding: 10px;">
         <img src="./img/pcb.jpg" width="450" alt="实物图"/>
-        <!-- <p><small>实物图</small></p> -->
-      </td>
+        </td>
       <td width="33%" style="padding: 10px;">
         <img src="./img/test.jpeg" width="450" alt="测试图"/>
-        <!-- <p><small>测试图</small></p> -->
-      </td>
+        </td>
       <td width="33%" style="padding: 10px;">
         <img src="./img/status.jpeg" width="250" alt="转速曲线图"/>
-        <!-- <p><small>转速曲线图</small></p> -->
-      </td>
+        </td>
     </tr>
   </table>
 </div>
@@ -49,10 +54,28 @@
 
 | 风扇 | PWM 输出 | Tach 输入 | 电源管理 |
 | ---- | -------- | --------- | -------- |
-| Fan1 | GPIO16   | GPIO32    | GPIO21  |
-| Fan2 | GPIO17   | GPIO33    | GPIO22  |
-| Fan3 | GPIO18   | GPIO25    | GPIO23  |
-| Fan4 | GPIO19   | GPIO26    | GPIO13  |
+| Fan1 | GPIO16   | GPIO32    | GPIO21   |
+| Fan2 | GPIO17   | GPIO33    | GPIO22   |
+| Fan3 | GPIO18   | GPIO25    | GPIO23   |
+| Fan4 | GPIO19   | GPIO26    | GPIO13   |
+
+## HTTP REST API 接口说明
+
+本项目集成了 Web Server，允许用户通过局域网发送 HTTP **POST** 请求来直接控制风扇。请将下表 URL 中的 `[设备IP]` 替换为控制器的真实局域网 IP，将 `[风扇编号]` 替换为 `1`、`2`、`3` 或 `4`。
+
+>  **注意**：控制命令必须使用 **POST** 方法发送。由于设备默认采用中文命名且带有空格（例如：“风扇 2”），在组装 URL 时需要进行 URL 编码（即替换为 `%E9%A3%8E%E6%89%87%20[风扇编号]`）。
+
+| 功能描述 | 请求方法 | 通用 API 接口 URL | URL 路径解码后内容 | 参数说明 |
+| :--- | :---: | :--- | :--- | :--: |
+| **打开风扇** | `POST` | `http://[设备IP]/fan/%E9%A3%8E%E6%89%87%20[风扇编号]/turn_on` | `/fan/风扇 [风扇编号]/turn_on` | 无 |
+| **关闭风扇** | `POST` | `http://[设备IP]/fan/%E9%A3%8E%E6%89%87%20[风扇编号]/turn_off` | `/fan/风扇 [风扇编号]/turn_off` | 无 |
+| **风扇调速** | `POST` | `http://[设备IP]/fan/%E9%A3%8E%E6%89%87%20[风扇编号]/turn_on?speed_level=[风速百分比]` | `/fan/风扇 [风扇编号]/turn_on?...` | `speed_level`：整数，范围 `1-100` |
+
+*Python 调用示例：*
+```python
+import requests
+# 开启 2 号风扇并调整至 50% 风速
+requests.post("http://[设备IP]/fan/风扇 2/turn_on", params={"speed_level": 50})
 
 ## HomeAssistant 自动化配置
 
