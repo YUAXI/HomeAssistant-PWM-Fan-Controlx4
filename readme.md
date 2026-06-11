@@ -29,7 +29,7 @@
         <img src="./img/pcb.jpg" width="450" alt="实物图"/>
       </td>
       <td width="25%" style="padding: 10px;">
-        <img src="./img/test.jpeg" width="450" alt="测试图"/>
+        <img src="./img/physical.jpeg" width="450" alt="测试图"/>
       </td>
       <td width="25%" style="padding: 10px;">
         <img src="./img/status.jpeg" width="250" alt="转速曲线图"/>
