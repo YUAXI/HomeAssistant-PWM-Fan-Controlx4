@@ -155,9 +155,7 @@ action:
 
 ## 交流群
 
-<div style="text-align: center;">
-  <img src="./img/wxgroup.jpg" width="280" alt="微信交流群"/>
-</div>
+厚礼蟹🦀 微信群二维码有效期只有7天 每隔7天更新一次好麻烦啊 偷个懒直接删掉二维码吧 这样也不用更新了 俺真是太聪明🌶 
 
 ## 请作者喝杯咖啡
 
