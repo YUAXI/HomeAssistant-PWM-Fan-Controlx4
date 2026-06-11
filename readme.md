@@ -25,15 +25,18 @@
 <div style="text-align: center;">
   <table>
     <tr>
-      <td width="33%" style="padding: 10px;">
+      <td width="25%" style="padding: 10px;">
         <img src="./img/pcb.jpg" width="450" alt="实物图"/>
-        </td>
-      <td width="33%" style="padding: 10px;">
+      </td>
+      <td width="25%" style="padding: 10px;">
         <img src="./img/test.jpeg" width="450" alt="测试图"/>
-        </td>
-      <td width="33%" style="padding: 10px;">
+      </td>
+      <td width="25%" style="padding: 10px;">
         <img src="./img/status.jpeg" width="250" alt="转速曲线图"/>
-        </td>
+      </td>
+      <td width="25%" style="padding: 10px;">
+        <img src="./img/webcontrol.png" width="250" alt="转速曲线图"/>
+      </td>
     </tr>
   </table>
 </div>
