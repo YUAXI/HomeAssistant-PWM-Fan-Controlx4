@@ -76,6 +76,7 @@
 import requests
 # 开启 2 号风扇并调整至 50% 风速
 requests.post("http://[设备IP]/fan/风扇 2/turn_on", params={"speed_level": 50})
+```
 
 ## HomeAssistant 自动化配置
 
