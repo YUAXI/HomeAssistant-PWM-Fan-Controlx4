@@ -94,7 +94,7 @@ requests.post("http://10.0.20.83/fan/风扇 2/turn_on", params={"speed_level": 5
 # 2. 关闭 2 号风扇 (POST)
 requests.post("http://10.0.20.83/fan/风扇 2/turn_off")
 
-# 2. 获取 1 号风扇的当前实时转速 (GET)
+# 3. 获取 1 号风扇的当前实时转速 (GET)
 response = requests.get("http://10.0.20.83/sensor/风扇 1 转速")
 
 # 响应json示例：
