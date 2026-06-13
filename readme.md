@@ -89,18 +89,24 @@
 import requests
 
 # 1. 开启 2 号风扇并调整至 50% 风速 (POST)
-requests.post("[http://10.0.20.83/fan/风扇](http://10.0.20.83/fan/风扇) 2/turn_on", params={"speed_level": 50})
+requests.post("http://10.0.20.83/fan/风扇 2/turn_on", params={"speed_level": 50})
+
+# 2. 关闭 2 号风扇 (POST)
+requests.post("http://10.0.20.83/fan/风扇 2/turn_off")
 
 # 2. 获取 1 号风扇的当前实时转速 (GET)
-response = requests.get("[http://10.0.20.83/sensor/风扇](http://10.0.20.83/sensor/风扇) 1 转速")
-if response.status_code == 200:
-    print("当前转速数据:", response.json()) # 返回 JSON 格式数据
+response = requests.get("http://10.0.20.83/sensor/风扇 1 转速")
 
-*Python 调用示例：*
-```python
-import requests
-# 开启 2 号风扇并调整至 50% 风速
-requests.post("http://[设备IP]/fan/风扇 2/turn_on", params={"speed_level": 50})
+# 响应json示例：
+# {
+#   "name_id": "sensor/风扇 1 转速",
+#   "id": "sensor-_______1_______",
+#   "value": 1507.5,
+#   "state": "1507.50 RPM"
+# }
+
+if response.status_code == 200:
+    print("当前转速:", response.json()['value'])
 ```
 
 ## HomeAssistant 自动化配置
