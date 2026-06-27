@@ -1,0 +1,610 @@
+esphome:
+  name: esp32pwm22810
+  friendly_name: ESP32 PWM 22810
+  # 上电初始化
+  on_boot:
+    priority: -100
+    then:
+      - logger.log: "正在发送激活指令给 LD2402G..."
+      - uart.write: [0x55, 0x5A, 0x02, 0x01, 0xAA] 
+      - delay: 200ms
+      - uart.write: [0x55, 0x01, 0x01, 0x00, 0xAA]
+
+esp32:
+  board: esp32dev
+  variant: ESP32 
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_FREERTOS_UNICORE: "y"
+      CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT: "y"
+
+logger:
+  level: INFO
+
+api:
+  encryption:
+    key: "LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk="
+
+ota:
+  - platform: esphome
+    password: "4283bb50a8cd66774ce91d2c9d412cf2"
+
+wifi:
+  ap:
+    ssid: "ESP32-Fan-22810"
+    password: "" 
+
+captive_portal:
+
+web_server:
+  port: 80
+
+# ==========================================
+# 24G 毫米波雷达硬件串口及动态调参抗干扰算法
+# ==========================================
+uart:
+  - id: radar_uart
+    tx_pin: GPIO5
+    rx_pin: GPIO4
+    baud_rate: 115200
+    debug:
+      direction: RX
+      dummy_receiver: true
+      sequence:
+        - lambda: |-
+            static std::string line_buffer = "";
+            static float last_dist = -1.0f;
+            static uint32_t last_change_time = 0;
+            
+            for (auto val : bytes) {
+              if (val == 0x0A) { // 遇到换行符
+                int dist_cm = -1;
+                if (sscanf(line_buffer.c_str(), "distance:%d", &dist_cm) == 1) {
+                  float current_m = dist_cm / 100.0f;
+                  
+                  // 从 HA 获取用户实时调节的区间限制（单位转成米进行对比）
+                  float min_limit = id(radar_min_dist).state;
+                  float max_limit = id(radar_max_dist).state;
+
+                  // 【动态抗干扰规则 1】：卡死用户自定义的有效距离区间
+                  if (current_m < min_limit || current_m > max_limit) {
+                    id(radar_target).publish_state(false);
+                    id(radar_dist).publish_state(NAN);
+                  } 
+                  else {
+                    // 【动态抗干扰规则 2】：抗静态震动/数据锁死
+                    if (std::abs(current_m - last_dist) > 0.01f) { 
+                      last_dist = current_m;
+                      last_change_time = millis();
+                    }
+                    
+                    // 如果读数在自定义区间内死卡超过 5 秒，判定为固定伪目标（如无人时的特定反射）
+                    if (millis() - last_change_time > 5000) { 
+                      id(radar_target).publish_state(false);
+                      id(radar_dist).publish_state(NAN);
+                    } else {
+                      // 合法移动目标
+                      id(radar_target).publish_state(true);
+                      id(radar_dist).publish_state(current_m);
+                    }
+                  }
+                }
+                line_buffer.clear();
+              } else if (val != 0x0D) {
+                line_buffer += (char)val;
+              }
+            }
+
+# 1-Wire 单总线
+one_wire:
+  - platform: gpio
+    pin: GPIO14
+
+output:
+  - platform: ledc
+    pin: GPIO16
+    id: fan1_pwm
+    frequency: 25000Hz
+  - platform: ledc
+    pin: GPIO17
+    id: fan2_pwm
+    frequency: 25000Hz
+  - platform: ledc
+    pin: GPIO18
+    id: fan3_pwm
+    frequency: 25000Hz
+  - platform: ledc
+    pin: GPIO19
+    id: fan4_pwm
+    frequency: 25000Hz
+
+switch:
+  - platform: gpio
+    pin: GPIO21
+    id: fan1_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: GPIO22
+    id: fan2_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: GPIO23
+    id: fan3_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: GPIO13
+    id: fan4_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+
+# ==========================================
+# HA 自行绑定下拉菜单
+# ==========================================
+select:
+  - platform: template
+    name: "风扇1 温度源绑定 F1-Src"
+    id: f1_source
+    optimistic: true
+    options:
+      - "未绑定"
+      - "温度 A"
+      - "温度 B"
+      - "温度 C"
+      - "温度 D"
+    initial_option: "温度 A"
+    restore_value: true
+
+  - platform: template
+    name: "风扇2 温度源绑定 F2-Src"
+    id: f2_source
+    optimistic: true
+    options:
+      - "未绑定"
+      - "温度 A"
+      - "温度 B"
+      - "温度 C"
+      - "温度 D"
+    initial_option: "温度 B"
+    restore_value: true
+
+  - platform: template
+    name: "风扇3 温度源绑定 F3-Src"
+    id: f3_source
+    optimistic: true
+    options:
+      - "未绑定"
+      - "温度 A"
+      - "温度 B"
+      - "温度 C"
+      - "温度 D"
+    initial_option: "温度 C"
+    restore_value: true
+
+  - platform: template
+    name: "风扇4 温度源绑定 F4-Src"
+    id: f4_source
+    optimistic: true
+    options:
+      - "未绑定"
+      - "温度 A"
+      - "温度 B"
+      - "温度 C"
+      - "温度 D"
+    initial_option: "温度 D"
+    restore_value: true
+
+# ==========================================
+# 4路风扇参数 + 新增雷达调参滑块
+# ==========================================
+number:
+  # ------ 新增：雷达动态调参控制滑块 ------
+  - platform: template
+    name: "雷达 最近过滤门限 Min"
+    id: radar_min_dist
+    optimistic: true
+    min_value: 0.0
+    max_value: 2.0
+    step: 0.05
+    unit_of_measurement: "m"
+    initial_value: 0.10
+    restore_value: true
+
+  - platform: template
+    name: "雷达 最远过滤门限 Max"
+    id: radar_max_dist
+    optimistic: true
+    min_value: 0.5
+    max_value: 8.0
+    step: 0.1
+    unit_of_measurement: "m"
+    initial_value: 1.5
+    restore_value: true
+
+  # ------ 风扇 1 参数 ------
+  - platform: template
+    name: "风扇1 启控温度 T-Min"
+    id: f1_t_min
+    optimistic: true
+    min_value: 10
+    max_value: 60
+    step: 1
+    initial_value: 30
+    restore_value: true
+  - platform: template
+    name: "风扇1 满载温度 T-Max"
+    id: f1_t_max
+    optimistic: true
+    min_value: 40
+    max_value: 90
+    step: 1
+    initial_value: 50
+    restore_value: true
+  - platform: template
+    name: "风扇1 最低风速 F-Min"
+    id: f1_f_min
+    optimistic: true
+    min_value: 0
+    max_value: 50
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 0
+    restore_value: true
+  - platform: template
+    name: "风扇1 最高风速 F-Max"
+    id: f1_f_max
+    optimistic: true
+    min_value: 50
+    max_value: 100
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 100
+    restore_value: true
+
+  # ------ 风扇 2 参数 ------
+  - platform: template
+    name: "风扇2 启控温度 T-Min"
+    id: f2_t_min
+    optimistic: true
+    min_value: 10
+    max_value: 60
+    step: 1
+    initial_value: 30
+    restore_value: true
+  - platform: template
+    name: "风扇2 满载温度 T-Max"
+    id: f2_t_max
+    optimistic: true
+    min_value: 40
+    max_value: 90
+    step: 1
+    initial_value: 50
+    restore_value: true
+  - platform: template
+    name: "风扇2 最低风速 F-Min"
+    id: f2_f_min
+    optimistic: true
+    min_value: 0
+    max_value: 50
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 0
+    restore_value: true
+  - platform: template
+    name: "风扇2 最高风速 F-Max"
+    id: f2_f_max
+    optimistic: true
+    min_value: 50
+    max_value: 100
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 100
+    restore_value: true
+
+  # ------ 风扇 3 参数 ------
+  - platform: template
+    name: "风扇3 启控温度 T-Min"
+    id: f3_t_min
+    optimistic: true
+    min_value: 10
+    max_value: 60
+    step: 1
+    initial_value: 30
+    restore_value: true
+  - platform: template
+    name: "风扇3 满载温度 T-Max"
+    id: f3_t_max
+    optimistic: true
+    min_value: 40
+    max_value: 90
+    step: 1
+    initial_value: 50
+    restore_value: true
+  - platform: template
+    name: "风扇3 最低风速 F-Min"
+    id: f3_f_min
+    optimistic: true
+    min_value: 0
+    max_value: 50
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 0
+    restore_value: true
+  - platform: template
+    name: "风扇3 最高风速 F-Max"
+    id: f3_f_max
+    optimistic: true
+    min_value: 50
+    max_value: 100
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 100
+    restore_value: true
+
+  # ------ 风扇 4 参数 ------
+  - platform: template
+    name: "风扇4 启控温度 T-Min"
+    id: f4_t_min
+    optimistic: true
+    min_value: 10
+    max_value: 60
+    step: 1
+    initial_value: 30
+    restore_value: true
+  - platform: template
+    name: "风扇4 满载温度 T-Max"
+    id: f4_t_max
+    optimistic: true
+    min_value: 40
+    max_value: 90
+    step: 1
+    initial_value: 50
+    restore_value: true
+  - platform: template
+    name: "风扇4 最低风速 F-Min"
+    id: f4_f_min
+    optimistic: true
+    min_value: 0
+    max_value: 50
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 0
+    restore_value: true
+  - platform: template
+    name: "风扇4 最高风速 F-Max"
+    id: f4_f_max
+    optimistic: true
+    min_value: 50
+    max_value: 100
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 100
+    restore_value: true
+
+# ==========================================
+# 定时调速核心控制逻辑
+# ==========================================
+interval:
+  - interval: 5s
+    then:
+      - lambda: |-
+          auto get_temp_by_source = [](std::string source) -> float {
+            if (source == "温度 A") return id(temp_a).state;
+            if (source == "温度 B") return id(temp_b).state;
+            if (source == "温度 C") return id(temp_c).state;
+            if (source == "温度 D") return id(temp_d).state;
+            return NAN; 
+          };
+
+          auto calculate_speed = [](float current_t, float t_min, float t_max, float f_min, float f_max) -> int {
+            if (std::isnan(current_t)) return 100;
+            if (current_t <= t_min) return (int)f_min;
+            if (current_t >= t_max) return (int)f_max;
+            float pct = ((current_t - t_min) * (f_max - f_min) / (t_max - t_min) + f_min);
+            return (int)roundf(pct);
+          };
+
+          std::string s1 = id(f1_source).state;
+          if (s1 != "未绑定") {
+            float t1 = get_temp_by_source(s1);
+            int v1 = calculate_speed(t1, id(f1_t_min).state, id(f1_t_max).state, id(f1_f_min).state, id(f1_f_max).state);
+            id(my_fan1).make_call().set_speed(v1).perform();
+          }
+
+          std::string s2 = id(f2_source).state;
+          if (s2 != "未绑定") {
+            float t2 = get_temp_by_source(s2);
+            int v2 = calculate_speed(t2, id(f2_t_min).state, id(f2_t_max).state, id(f2_f_min).state, id(f2_f_max).state);
+            id(my_fan2).make_call().set_speed(v2).perform();
+          }
+
+          std::string s3 = id(f3_source).state;
+          if (s3 != "未绑定") {
+            float t3 = get_temp_by_source(s3);
+            int v3 = calculate_speed(t3, id(f3_t_min).state, id(f3_t_max).state, id(f3_f_min).state, id(f3_f_max).state);
+            id(my_fan3).make_call().set_speed(v3).perform();
+          }
+
+          std::string s4 = id(f4_source).state;
+          if (s4 != "未绑定") {
+            float t4 = get_temp_by_source(s4);
+            int v4 = calculate_speed(t4, id(f4_t_min).state, id(f4_t_max).state, id(f4_f_min).state, id(f4_f_max).state);
+            id(my_fan4).make_call().set_speed(v4).perform();
+          }
+
+# ==========================================
+# 虚拟雷达有人/无人实体
+# ==========================================
+binary_sensor:
+  - platform: template
+    name: "雷达检测到目标 Target"
+    id: radar_target
+
+# ==========================================
+# 传感器定义
+# ==========================================
+sensor:
+  # 4个温度传感器
+  - platform: dallas_temp
+    index: 0
+    name: "温度 A"
+    id: temp_a
+    update_interval: 5s
+
+  - platform: dallas_temp
+    index: 1
+    name: "温度 B"
+    id: temp_b
+    update_interval: 5s
+
+  - platform: dallas_temp
+    index: 2
+    name: "温度 C"
+    id: temp_c
+    update_interval: 5s
+
+  - platform: dallas_temp
+    index: 3
+    name: "温度 D"
+    id: temp_d
+    update_interval: 5s
+
+  # 4路测速
+  - platform: pulse_counter
+    pin:
+      number: GPIO32
+      mode: INPUT 
+    name: "风扇 1 转速"
+    id: fan1_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO33
+      mode: INPUT  
+    name: "风扇 2 转速"
+    id: fan2_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO25
+      mode: INPUT 
+    name: "风扇 3 转速"
+    id: fan3_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO26
+      mode: INPUT 
+    name: "风扇 4 转速"
+    id: fan4_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  # 虚拟雷达目标距离传感器
+  - platform: template
+    name: "雷达目标距离 Dist"
+    id: radar_dist
+    unit_of_measurement: "m"
+    icon: "mdi:ruler"
+
+  - platform: uptime
+    name: "设备运行时间"
+    entity_category: "diagnostic"
+    id: uptime_sensor
+    update_interval: 60s
+
+  - platform: wifi_signal
+    name: "Wi-Fi 信号强度"
+    entity_category: "diagnostic"
+    id: wifi_rssi
+    update_interval: 60s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "设备 IP 地址"
+      entity_category: "diagnostic"
+    ssid:
+      name: "连接 Wi-Fi SSID"
+      entity_category: "diagnostic"
+  - platform: version
+    name: "ESPHome 版本"
+    entity_category: "diagnostic"
+
+fan:
+  - platform: speed
+    output: fan1_pwm
+    name: "风扇 1"
+    id: my_fan1
+    speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - then:
+          - switch.turn_on: fan1_pwr
+    on_turn_off:
+      - then:
+          - switch.turn_off: fan1_pwr
+
+  - platform: speed
+    output: fan2_pwm
+    name: "风扇 2"
+    id: my_fan2
+    speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - then:
+          - switch.turn_on: fan2_pwr
+    on_turn_off:
+      - then:
+          - switch.turn_off: fan2_pwr
+
+  - platform: speed
+    output: fan3_pwm
+    name: "风扇 3"
+    id: my_fan3
+    speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - then:
+          - switch.turn_on: fan3_pwr
+    on_turn_off:
+      - then:
+          - switch.turn_off: fan3_pwr
+
+  - platform: speed
+    output: fan4_pwm
+    name: "风扇 4"
+    id: my_fan4
+    speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - then:
+          - switch.turn_on: fan4_pwr
+    on_turn_off:
+      - then:
+          - switch.turn_off: fan4_pwr
