@@ -44,12 +44,19 @@ jobs:
       - name: Compile
         run: esphome compile ${{ matrix.path }}
 
+      - name: Collect firmware
+        run: |
+          mkdir -p output
+          find .esphome -name "firmware*.bin" -exec cp {} output/ \;
+          echo "=== Output files ==="
+          ls -lh output/
+          [ "$(ls -A output)" ] || (echo "No firmware found!" && exit 1)
+
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
-          path: .esphome/build/**/firmware*.bin
-          if-no-files-found: error
+          path: output/
           retention-days: 1
 
   release:
@@ -64,12 +71,8 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: Prepare release files
-        run: |
-          mkdir -p release
-          find artifacts -name "*.bin" -exec cp {} release/ \;
-          echo "=== Release files ==="
-          ls -lh release/
+      - name: List files
+        run: find artifacts -type f -ls || echo "No files"
 
       - name: Get date
         id: date
@@ -90,11 +93,11 @@ jobs:
             - v2.0-ds18b20 — DS18B20 温度控制版本
             - v2.0-ds18b20-radar — DS18B20 + 毫米波雷达版本
 
-            **文件类型：**
-            - `.bin` — 标准固件
-            - `.factory.bin` — 工厂固件
-            - `.ota.bin` — OTA 升级固件
-          files: release/*
+            **文件类型说明：**
+            - `.firmware.bin` — 标准固件
+            - `.firmware.factory.bin` — 工厂固件
+            - `.firmware.ota.bin` — OTA 升级固件
+          files: artifacts/*
           draft: false
           prerelease: false
           generate_release_notes: true
