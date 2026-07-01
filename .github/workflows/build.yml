@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Cache ESPHome platform
+      - name: Cache ESPHome
         uses: actions/cache@v4
         with:
           path: ~/.esphome
@@ -41,28 +41,16 @@ jobs:
       - name: Install ESPHome
         run: pip install esphome
 
-      - name: Compile ${{ matrix.name }}
+      - name: Compile
         run: esphome compile ${{ matrix.path }}
 
-      - name: Collect firmware files
-        run: |
-          mkdir -p release-assets
-          BUILD_DIR=".esphome/build"
-
-          for f in $(find "$BUILD_DIR" -name "firmware*.bin" 2>/dev/null); do
-            base=$(basename "$f")
-            cp "$f" "release-assets/${{ matrix.name }}.${base}"
-          done
-
-          echo "=== Collected ==="
-          ls -lh release-assets/
-
-      - name: Upload artifact
+      - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
-          name: firmware-${{ matrix.name }}
-          path: release-assets/
-          if-no-files-found: warn
+          name: ${{ matrix.name }}
+          path: .esphome/build/**/firmware*.bin
+          if-no-files-found: error
+          retention-days: 1
 
   release:
     needs: build
@@ -70,43 +58,43 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y.%-m.%-d')" >> $GITHUB_OUTPUT
-
-      - name: Download all firmware artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: all-firmware
-          pattern: firmware-*
+          path: artifacts
+          merge-multiple: true
 
-      - name: Rename firmware files
+      - name: Prepare release files
         run: |
-          mkdir -p final-assets
-          find all-firmware -name "*.bin" -exec cp {} final-assets/ \;
-          echo "=== Final files ==="
-          ls -lh final-assets/
+          mkdir -p release
+          find artifacts -name "*.bin" -exec cp {} release/ \;
+          echo "=== Release files ==="
+          ls -lh release/
 
-      - name: Create GitHub Release
+      - name: Get date
+        id: date
+        run: echo "tag=$(date +'%Y.%-m.%-d')" >> $GITHUB_OUTPUT
+
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.date.outputs.date }}
-          name: ${{ steps.date.outputs.date }}
+          tag_name: ${{ steps.date.outputs.tag }}
+          name: ${{ steps.date.outputs.tag }}
           body: |
-            ESP32 PWM Fan Controller firmware ${{ steps.date.outputs.date }}
+            ESP32 PWM Fan Controller ${{ steps.date.outputs.tag }}
 
-            **包含固件版本：**
+            **固件版本：**
             - v1.0-dual-core — 双核版本
             - v1.0-single-core — 单核版本
             - v2.0-basic — 基础版本
             - v2.0-ds18b20 — DS18B20 温度控制版本
             - v2.0-ds18b20-radar — DS18B20 + 毫米波雷达版本
 
-            **固件文件说明：**
-            - `.bin` — 标准固件，用于常规烧录
-            - `.factory.bin` — 工厂固件，用于完整恢复出厂
+            **文件类型：**
+            - `.bin` — 标准固件
+            - `.factory.bin` — 工厂固件
             - `.ota.bin` — OTA 升级固件
-          files: final-assets/*.bin
+          files: release/*
           draft: false
           prerelease: false
           generate_release_notes: true
