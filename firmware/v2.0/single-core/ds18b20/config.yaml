@@ -29,6 +29,11 @@ wifi:
 
 captive_portal:
 
+esp32_ble_tracker:
+
+bluetooth_proxy:
+  active: true
+
 web_server:
   port: 80
 
