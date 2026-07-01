@@ -1,0 +1,115 @@
+name: Build Firmware
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: v1.0-dual-core
+            path: firmware/v1.0/dual-core/config.yaml
+          - name: v1.0-single-core
+            path: firmware/v1.0/single-core/config.yaml
+          - name: v2.0-basic
+            path: firmware/v2.0/single-core/basic/config.yaml
+          - name: v2.0-ds18b20
+            path: firmware/v2.0/single-core/ds18b20/config.yaml
+          - name: v2.0-ds18b20-radar
+            path: firmware/v2.0/single-core/ds18b20-radar/config.yaml
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache ESPHome platform
+        uses: actions/cache@v4
+        with:
+          path: ~/.esphome
+          key: esphome-${{ runner.os }}-${{ hashFiles('firmware/**/config.yaml') }}
+          restore-keys: esphome-${{ runner.os }}-
+
+      - name: Install ESPHome
+        run: pip install esphome
+
+      - name: Compile ${{ matrix.name }}
+        run: esphome compile ${{ matrix.path }}
+
+      - name: Collect firmware files
+        run: |
+          OUTPUT_DIR="release-assets"
+          mkdir -p "$OUTPUT_DIR"
+
+          # ESPHome 输出目录
+          BUILD_DIR=".esphome/build"
+          FIRMWARE_BIN=$(find "$BUILD_DIR" -name "firmware.bin" -not -name "*.factory.bin" -not -name "*.ota.bin" | head -1)
+          FACTORY_BIN=$(find "$BUILD_DIR" -name "firmware.factory.bin" | head -1)
+          OTA_BIN=$(find "$BUILD_DIR" -name "firmware.ota.bin" | head -1)
+
+          if [ -n "$FIRMWARE_BIN" ]; then
+            cp "$FIRMWARE_BIN" "$OUTPUT_DIR/${{ matrix.name }}.bin"
+          fi
+          if [ -n "$FACTORY_BIN" ]; then
+            cp "$FACTORY_BIN" "$OUTPUT_DIR/${{ matrix.name }}.factory.bin"
+          fi
+          if [ -n "$OTA_BIN" ]; then
+            cp "$OTA_BIN" "$OUTPUT_DIR/${{ matrix.name }}.ota.bin"
+          fi
+
+          echo "=== Collected files ==="
+          ls -lh "$OUTPUT_DIR/"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.name }}
+          path: release-assets/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all firmware artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-firmware
+          pattern: firmware-*
+          merge-multiple: true
+
+      - name: List firmware files
+        run: find all-firmware -type f -exec ls -lh {} \;
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: "Build #${{ github.run_number }}"
+          body: |
+            ESP32 PWM Fan Controller firmware build #${{ github.run_number }}
+
+            **包含固件版本：**
+            - v1.0-dual-core — 双核版本
+            - v1.0-single-core — 单核版本
+            - v2.0-basic — 基础版本
+            - v2.0-ds18b20 — DS18B20 温度控制版本
+            - v2.0-ds18b20-radar — DS18B20 + 毫米波雷达版本
+
+            **固件文件说明：**
+            - `.bin` — 标准固件，用于常规烧录
+            - `.factory.bin` — 工厂固件，用于完整恢复出厂
+            - `.ota.bin` — OTA 升级固件
+          files: all-firmware/**/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
