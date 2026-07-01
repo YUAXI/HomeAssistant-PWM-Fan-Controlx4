@@ -46,33 +46,23 @@ jobs:
 
       - name: Collect firmware files
         run: |
-          OUTPUT_DIR="release-assets"
-          mkdir -p "$OUTPUT_DIR"
-
-          # ESPHome 输出目录
+          mkdir -p release-assets
           BUILD_DIR=".esphome/build"
-          FIRMWARE_BIN=$(find "$BUILD_DIR" -name "firmware.bin" -not -name "*.factory.bin" -not -name "*.ota.bin" | head -1)
-          FACTORY_BIN=$(find "$BUILD_DIR" -name "firmware.factory.bin" | head -1)
-          OTA_BIN=$(find "$BUILD_DIR" -name "firmware.ota.bin" | head -1)
 
-          if [ -n "$FIRMWARE_BIN" ]; then
-            cp "$FIRMWARE_BIN" "$OUTPUT_DIR/${{ matrix.name }}.bin"
-          fi
-          if [ -n "$FACTORY_BIN" ]; then
-            cp "$FACTORY_BIN" "$OUTPUT_DIR/${{ matrix.name }}.factory.bin"
-          fi
-          if [ -n "$OTA_BIN" ]; then
-            cp "$OTA_BIN" "$OUTPUT_DIR/${{ matrix.name }}.ota.bin"
-          fi
+          for f in $(find "$BUILD_DIR" -name "firmware*.bin" 2>/dev/null); do
+            base=$(basename "$f")
+            cp "$f" "release-assets/${{ matrix.name }}.${base}"
+          done
 
-          echo "=== Collected files ==="
-          ls -lh "$OUTPUT_DIR/"
+          echo "=== Collected ==="
+          ls -lh release-assets/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: firmware-${{ matrix.name }}
           path: release-assets/
+          if-no-files-found: warn
 
   release:
     needs: build
@@ -85,10 +75,9 @@ jobs:
         with:
           path: all-firmware
           pattern: firmware-*
-          merge-multiple: true
 
       - name: List firmware files
-        run: find all-firmware -type f -exec ls -lh {} \;
+        run: find all-firmware -type f 2>/dev/null || echo "No firmware files found"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
