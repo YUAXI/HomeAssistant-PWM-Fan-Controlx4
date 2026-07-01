@@ -452,10 +452,10 @@ text_sensor:
   - platform: wifi_info
     ip_address:
       name: "设备 IP 地址"
-        entity_category: "diagnostic"
+      entity_category: "diagnostic"
     ssid:
       name: "连接 Wi-Fi SSID"
-        entity_category: "diagnostic"
+      entity_category: "diagnostic"
   - platform: version
     name: "ESPHome 版本"
     entity_category: "diagnostic"
