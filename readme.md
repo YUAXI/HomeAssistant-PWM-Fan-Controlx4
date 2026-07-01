@@ -95,60 +95,66 @@ HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器�
 
 ## 固件版本说明
 
-### 版本选择
+> ⚠️ 如果你购买的是成品设备，主控采用**单核设计**，**只能刷入 v1.0 单核版本或任意 v2.0 版本**。双核固件必然导致无法启动。
 
-> **成品设备用户**：如果你购买的是我的成品 那么主控采用**单核设计**，只能刷入 v1.0 单核版本或 v2.0 系列版本，**请勿刷入双核固件这将必然导致无法启动**。
+### 版本说明
 
-| 使用场景 | 推荐版本 |
-|:---------|:---------|
-| 简单风扇控制，已有 HA 自动化 | v1.0 双核 / v1.0 单核 |
-| 需要本地温度控制，不依赖 HA 运行 | v2.0 DS18B20 |
-| 智能家居，需要人体感应控制 | v2.0 DS18B20+雷达 |
-| 长期运行，关注功耗 | v2.0 单核版本 |
-| 复杂应用，需要高性能 | v1.0 双核版本 |
+| 版本 | 核心卖点 | 适用场景 |
+|:-----|:---------|:---------|
+| **v1.0 双核** | 基础 4 路风扇控制，双核运行 | 已有 HA 自动化、需要更高性能的场合 |
+| **v1.0 单核** | 基础 4 路风扇控制，单核低功耗 | 已有 HA 自动化、对功耗敏感 |
+| **v2.0 Basic** | 简单风扇控制，单核 | v2.0 硬件用户无需温度与雷达的最低门槛版本 |
+| **v2.0 DS18B20** | 内置 DS18B20 温度控制，不依赖 HA 即可自动调速 | 服务器/机柜/NAS 散热，需要本地独立运行 |
+| **v2.0 DS18B20+雷达** | 上述功能 + 24GHz 毫米波人体存在检测 | 需要人体感应联动风扇的智能家居场景 |
 
-> 固件文件不再存放在仓库中，请前往 [GitHub Releases](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/releases) 下载编译好的固件。Release 文件名中的版本标识与上表对应。
+### 功能对比
 
-### 版本功能对比
+| 功能 | v1.0 双核 | v1.0 单核 | v2.0 Basic | v2.0 DS18B20 | v2.0 +雷达 |
+|:-----|:--------:|:--------:|:----------:|:------------:|:----------:|
+| 4 路 PWM 风扇控制 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 实时转速显示 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Web 界面 / HTTP API | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 诊断实体 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 蓝牙代理 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| DS18B20 温度控制 | - | - | - | ✅ | ✅ |
+| 毫米波雷达 | - | - | - | - | ✅ |
+| CPU 核心数 | 双核 | 单核 | 单核 | 单核 | 单核 |
 
-| 功能 | v1.0 | v2.0 Basic | v2.0 DS18B20 | v2.0 DS18B20+雷达 |
-|:-----|:----:|:----------:|:------------:|:-----------------:|
-| 4 路 PWM 风扇控制 | ✅ | ✅ | ✅ | ✅ |
-| 实时转速显示 | ✅ | ✅ | ✅ | ✅ |
-| Web 界面 / HTTP API | ✅ | ✅ | ✅ | ✅ |
-| 诊断实体 | ✅ | ✅ | ✅ | ✅ |
-| 蓝牙代理 | ✅ | ✅ | ✅ | ✅ |
-| DS18B20 温度控制 | - | - | ✅ | ✅ |
-| 毫米波雷达 | - | - | - | ✅ |
-| 双核运行 | 可选 | - | - | - |
+### 如何获取固件
 
-### 固件路径
-
-| 版本 | 配置文件路径 |
-|:-----|:------------|
-| v1.0 双核 | `firmware/v1.0/dual-core/` |
-| v1.0 单核 | `firmware/v1.0/single-core/` |
-| v2.0 Basic | `firmware/v2.0/single-core/basic/` |
-| v2.0 DS18B20 | `firmware/v2.0/single-core/ds18b20/` |
-| v2.0 DS18B20+雷达 | `firmware/v2.0/single-core/ds18b20-radar/` |
-
-### 固件获取与烧录
-
-预编译固件已发布在 **GitHub Releases**，可直接下载：
+固件由 GitHub Actions 自动编译发布，无需手动打包：
 
 [→ 前往 Releases 下载](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/releases)
 
 每个 Release 包含每个版本的三种固件：
 
+| Release 文件名 | 对应版本 |
+|:---------------|:---------|
+| `v1.0-dual-core.firmware.bin` | v1.0 双核 |
+| `v1.0-single-core.firmware.bin` | v1.0 单核 |
+| `v2.0-basic.firmware.bin` | v2.0 Basic |
+| `v2.0-ds18b20.firmware.bin` | v2.0 DS18B20 |
+| `v2.0-ds18b20-radar.firmware.bin` | v2.0 DS18B20+雷达 |
+
+每种固件对应 3 个文件：
+
 | 文件后缀 | 用途 |
 |:---------|:-----|
 | `.firmware.bin` | 标准固件，常规烧录 |
-| `.firmware.factory.bin` | 工厂固件，完整恢复出厂 |
-| `.firmware.ota.bin` | OTA 升级固件 |
+| `.firmware.factory.bin` | 工厂固件，完整恢复出厂设置 |
+| `.firmware.ota.bin` | OTA 远程升级固件 |
 
-**烧录方法**：通过 Type-C 接口连接电脑，使用 ESPHome 烧录工具或 esptool 选择对应 `.bin` 文件烧录。
+**烧录方法**：Type-C 连接电脑，使用 ESPHome 烧录工具或 esptool 烧录。
 
-**自定义编译**：使用 ESPHome 对应的 `.yaml` 配置文件自行编译。
+**自定义编译**：如果你需要修改配置，可用源代码中的 `.yaml` 文件自行编译：
+
+| 版本 | 配置文件 |
+|:-----|:---------|
+| v1.0 双核 | `firmware/v1.0/dual-core/config.yaml` |
+| v1.0 单核 | `firmware/v1.0/single-core/config.yaml` |
+| v2.0 Basic | `firmware/v2.0/single-core/basic/config.yaml` |
+| v2.0 DS18B20 | `firmware/v2.0/single-core/ds18b20/config.yaml` |
+| v2.0 DS18B20+雷达 | `firmware/v2.0/single-core/ds18b20-radar/config.yaml` |
 
 ---
 
