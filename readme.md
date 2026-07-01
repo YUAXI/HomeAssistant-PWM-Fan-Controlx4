@@ -18,7 +18,7 @@ HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器�
 
 | 日期 | 更新内容 |
 |:-----|:---------|
-| 2026-07-01 | 全版本新增蓝牙代理功能；README 重构 |
+| 2026-07-01 | 全版本新增蓝牙代理功能；CI 自动编译并发布 Release；移除仓库中预编译固件；README 重构 |
 | v2.0 | 内置 DS18B20 温度控制、毫米波雷达版本、v2.0 硬件设计 |
 | v1.0 | Web 界面控制、HTTP REST API、诊断实体 |
 
@@ -130,15 +130,19 @@ HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器�
 | v2.0 DS18B20 | `firmware/v2.0/single-core/ds18b20/` |
 | v2.0 DS18B20+雷达 | `firmware/v2.0/single-core/ds18b20-radar/` |
 
-### 固件烧录
+### 固件获取与烧录
 
-所有版本均提供三种预编译固件：
+预编译固件已发布在 **GitHub Releases**，可直接下载：
 
-| 文件 | 用途 |
-|:-----|:-----|
-| `firmware.bin` | 标准固件，常规烧录 |
-| `firmware.factory.bin` | 工厂固件，完整恢复出厂 |
-| `firmware.ota.bin` | OTA 升级固件 |
+[→ 前往 Releases 下载](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/releases)
+
+每个 Release 包含每个版本的三种固件：
+
+| 文件后缀 | 用途 |
+|:---------|:-----|
+| `.firmware.bin` | 标准固件，常规烧录 |
+| `.firmware.factory.bin` | 工厂固件，完整恢复出厂 |
+| `.firmware.ota.bin` | OTA 升级固件 |
 
 **烧录方法**：通过 Type-C 接口连接电脑，使用 ESPHome 烧录工具或 esptool 选择对应 `.bin` 文件烧录。
 
