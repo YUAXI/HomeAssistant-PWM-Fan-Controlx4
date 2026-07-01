@@ -7,18 +7,18 @@ HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器�
 **主要功能：**
 
 - 通过 ESPHome 集成 Home Assistant 控制
-- 4 路风扇独立 PWM 调速及实时转速显示（1-100%）
+- 4 路风扇独立 PWM 调速及实时转速显示（1-100%），支持**完全关停风扇**
 - 支持 Web 网页端 / HTTP REST API 直接控制
 - 内置诊断实体（运行时间、Wi-Fi 信号强度、IP 地址、固件版本等）
-- v2.0 版本内置温度控制（DS18B20），无需 HA 自动化即可实现温度驱动调速
+- v2.0 版本提供 DS18B20 温度传感器接口，支持**本地温度驱动调速**（也可通过 HA 自动化实现）
 - v2.0 雷达版本支持 24GHz 毫米波人体存在检测
-- 全版本支持蓝牙代理（BLE Proxy），可扩展 Home Assistant 蓝牙覆盖范围
+- 全版本支持**蓝牙代理（BLE Proxy）**，可扩展 Home Assistant 蓝牙覆盖范围
 
 ## 更新日志
 
 | 日期 | 更新内容 |
 |:-----|:---------|
-| 2026-07-01 | 全版本新增蓝牙代理功能（`esp32_ble_tracker` + `bluetooth_proxy`） |
+| 2026-07-01 | 全版本新增蓝牙代理功能；实体名称改为英文以简化 API 路径（`friendly_name` 保留中文显示）；README 重构 |
 | v2.0 | 内置 DS18B20 温度控制、毫米波雷达版本、v2.0 硬件设计 |
 | v1.0 | Web 界面控制、HTTP REST API、诊断实体 |
 
@@ -67,13 +67,13 @@ HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器�
 | 外壳主体 | [case.step](./hardware/v1.0/3d-models/print/case.step) |
 | 上盖 | [top-cover.step](./hardware/v1.0/3d-models/print/top-cover.step) |
 
-> **注意**：v2.0 硬件与 v1.0 固件兼容，v2.0 外壳也兼容 v1.0 主板。
+---
 
 ## 硬件原理
 
-- **风扇电源控制**：使用 `TPS22810DBVR` 芯片，可直接切断风扇电源，解决风扇无法完全停转的问题
-- **电源方案**：12V 转 3.3V 采用 `TPS5430DDAR` DC-DC + `AMS1117-3.3` 线性稳压，先降至 5V 再降至 3.3V，效率高、纹波低
-- **USB 转串口**：板载 `CH340C`，Type-C 接口连接电脑即可烧录固件
+- **风扇电源控制**：使用 `TPS22810DBVR` 芯片直接切断风扇供电，实现风扇**完全停转**，解决普通 PWM 控制器关不掉风扇的问题
+- **电源方案**：12V → 5V（`TPS5430DDAR` DC-DC）→ 3.3V（`AMS1117-3.3`），效率高、纹波低
+- **USB 转串口**：板载 `CH340C`，Type-C 连接电脑即可烧录
 
 ## IO 接口说明
 
@@ -86,11 +86,10 @@ HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器�
 
 **v2.0 额外接口**：
 
-| 接口 | 用途 | 适用版本 |
-|:-----|:-----|:---------|
-| GPIO14 | DS18B20 温度传感器 1-Wire | DS18B20 / DS18B20+雷达 |
-| GPIO5 | LD2402G 雷达 UART TX | 仅雷达版本 |
-| GPIO4 | LD2402G 雷达 UART RX | 仅雷达版本 |
+| 接口 | 说明 |
+|:-----|:-----|
+| GPIO14（3PIN 排针） | DS18B20 温度传感器 1-Wire 总线 |
+| 4PIN 开发者排针（5V / GND / GPIO5 / GPIO4） | 通用扩展接口，可接入 LD2402G 雷达、RS485 模块等外设。雷达版本固件以此接口连接 LD2402G 作为示范 |
 
 ---
 
@@ -98,12 +97,12 @@ HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器�
 
 ### 版本选择
 
-> **成品设备用户**：本项目作者提供的成品设备采用**单核设计**，只能刷入 v1.0 单核版本或 v2.0 系列版本，**请勿刷入双核固件**。
+> **成品设备用户**：如果你购买的是我的成品 那么主控采用**单核设计**，只能刷入 v1.0 单核版本或 v2.0 系列版本，**请勿刷入双核固件这将必然导致无法启动**。
 
 | 使用场景 | 推荐版本 |
 |:---------|:---------|
 | 简单风扇控制，已有 HA 自动化 | [v1.0 双核](./firmware/v1.0/dual-core/) / [单核](./firmware/v1.0/single-core/) |
-| 需要独立温度控制，不想配置自动化 | [v2.0 DS18B20](./firmware/v2.0/single-core/ds18b20/) |
+| 需要本地温度控制，不依赖 HA 运行 | [v2.0 DS18B20](./firmware/v2.0/single-core/ds18b20/) |
 | 智能家居，需要人体感应控制 | [v2.0 DS18B20+雷达](./firmware/v2.0/single-core/ds18b20-radar/) |
 | 长期运行，关注功耗 | v2.0 单核版本 |
 | 复杂应用，需要高性能 | [v1.0 双核版本](./firmware/v1.0/dual-core/) |
@@ -196,7 +195,7 @@ HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器�
 
 ### 5. 配置 v2.0 温度控制（DS18B20 版本）
 
-> 仅适用于 **v2.0 DS18B20 / DS18B20+雷达**固件，v1.0 用户请使用 [Home Assistant 自动化](#home-assistant-自动化配置)。
+> 此步骤适用于 **v2.0 DS18B20 / DS18B20+雷达**固件。如不使用 DS18B20 探头，可通过 [Home Assistant 自动化](#home-assistant-自动化配置)实现温度联动调速。
 
 #### DS18B20 接线
 
@@ -236,31 +235,48 @@ DS18B20 采用 3 线制连接，接口为板载 **GPIO14**（3PIN 排针）：
 
 ## HTTP REST API 接口
 
+本项目集成了 Web Server，可通过局域网 HTTP 请求直接控制风扇或获取传感器数据。
+
 > ⚠️ 控制类命令（打开/关闭/调速）使用 **POST**，状态获取使用 **GET**。
-> URL 中中文路径需进行 URL 编码。
+> URL 中空格用 `%20` 编码。
+
+### 实体名称对照
+
+| 实体 | entity_id | URL 路径 |
+|:-----|:----------|:---------|
+| 风扇 1 | `fan.fan_1` | `/fan/Fan%201` |
+| 风扇 2 | `fan.fan_2` | `/fan/Fan%202` |
+| 风扇 3 | `fan.fan_3` | `/fan/Fan%203` |
+| 风扇 4 | `fan.fan_4` | `/fan/Fan%204` |
+| 风扇 1 转速 | `sensor.fan_1_rpm` | `/sensor/Fan%201%20RPM` |
+| 风扇 2 转速 | `sensor.fan_2_rpm` | `/sensor/Fan%202%20RPM` |
+| 风扇 3 转速 | `sensor.fan_3_rpm` | `/sensor/Fan%203%20RPM` |
+| 风扇 4 转速 | `sensor.fan_4_rpm` | `/sensor/Fan%204%20RPM` |
+
+### 接口列表
 
 | 功能 | 方法 | URL |
 |:-----|:----:|:----|
-| 打开风扇 | `POST` | `http://[设备IP]/fan/%E9%A3%8E%E6%89%87%20[风扇编号]/turn_on` |
-| 关闭风扇 | `POST` | `http://[设备IP]/fan/%E9%A3%8E%E6%89%87%20[风扇编号]/turn_off` |
-| 风扇调速 | `POST` | `http://[设备IP]/fan/%E9%A3%8E%E6%89%87%20[风扇编号]/turn_on?speed_level=[1-100]` |
-| 获取转速 | `GET` | `http://[设备IP]/sensor/%E9%A3%8E%E6%89%87%20[风扇编号]%20%E8%BD%AC%E9%80%9F` |
+| 打开风扇 | `POST` | `http://[设备IP]/fan/Fan%20[编号]/turn_on` |
+| 关闭风扇 | `POST` | `http://[设备IP]/fan/Fan%20[编号]/turn_off` |
+| 风扇调速 | `POST` | `http://[设备IP]/fan/Fan%20[编号]/turn_on?speed_level=[1-100]` |
+| 获取转速 | `GET` | `http://[设备IP]/sensor/Fan%20[编号]%20RPM` |
 
-其中 `[风扇编号]` 替换为 `1`、`2`、`3` 或 `4`。
+其中 `[编号]` 替换为 `1`、`2`、`3` 或 `4`。
 
-**Python 调用示例**：
+### Python 调用示例
 
 ```python
 import requests
 
 # 开启 2 号风扇并调整至 50% 风速
-requests.post("http://10.0.20.83/fan/风扇 2/turn_on", params={"speed_level": 50})
+requests.post("http://10.0.20.83/fan/Fan 2/turn_on", params={"speed_level": 50})
 
 # 关闭 2 号风扇
-requests.post("http://10.0.20.83/fan/风扇 2/turn_off")
+requests.post("http://10.0.20.83/fan/Fan 2/turn_off")
 
 # 获取 1 号风扇当前转速
-response = requests.get("http://10.0.20.83/sensor/风扇 1 转速")
+response = requests.get("http://10.0.20.83/sensor/Fan 1 RPM")
 if response.status_code == 200:
     print("当前转速:", response.json()['value'])
 ```
@@ -269,7 +285,7 @@ if response.status_code == 200:
 
 ## Home Assistant 自动化配置
 
-> **v2.0 用户**：设备已内置温度控制，**无需配置以下自动化**。此配置仅适用于 **v1.0 固件**或需要在 HA 端实现更复杂控制逻辑的场景。
+> **v2.0 用户**：DS18B20 版本已内置本地温度控制功能，但同样可以使用以下自动化方式。此配置适用于所有版本，尤其适合 v1.0 用户或需要通过 HA 端获取 CPU 温度、环境温湿度等非 DS18B20 温度源的场景。
 
 ### 配置步骤
 
@@ -295,7 +311,7 @@ condition:
 action:
   - service: fan.set_percentage
     target:
-      entity_id: fan.esp32_pwm_22810_feng_shan_1  # 【需修改】
+      entity_id: fan.fan_1  # 【需修改】
     data:
       percentage: >
         {% set current_temp = states('sensor.nas_temperature_x86_pkg_temp') | float(0) %}  {# 【需修改】 #}
@@ -331,7 +347,7 @@ action:
 
 ## 交流群
 
-厚礼蟹🦀 微信群二维码有效期只有7天 每隔7天更新一次好麻烦啊 偷个懒直接删掉二维码吧 这样也不用更新了 俺真是太聪明🌶
+**不再维护群二维码**
 
 ## 请作者喝杯咖啡
 
@@ -349,14 +365,6 @@ action:
     </tr>
   </table>
 </div>
-
-## 二创项目
-
-欢迎大家对本项目的硬件、软件甚至外壳进行二创和优化。如果你希望将自己的 Fork 项目展示在本项目中，请先联系我并提交你的修改说明。
-
-| 项目地址 | 项目说明 |
-|:---------|:---------|
-| None | None |
 
 ## 开源许可证
 

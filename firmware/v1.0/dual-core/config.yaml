@@ -82,7 +82,8 @@ sensor:
     pin:
       number: GPIO32
       mode: INPUT 
-    name: "风扇 1 转速"
+    name: "Fan 1 RPM"
+    friendly_name: "风扇 1 转速"
     id: fan1_rpm
     unit_of_measurement: "RPM"
     update_interval: 4s
@@ -95,7 +96,8 @@ sensor:
     pin:
       number: GPIO33
       mode: INPUT  
-    name: "风扇 2 转速"
+    name: "Fan 2 RPM"
+    friendly_name: "风扇 2 转速"
     id: fan2_rpm
     unit_of_measurement: "RPM"
     update_interval: 4s
@@ -108,7 +110,8 @@ sensor:
     pin:
       number: GPIO25
       mode: INPUT 
-    name: "风扇 3 转速"
+    name: "Fan 3 RPM"
+    friendly_name: "风扇 3 转速"
     id: fan3_rpm
     unit_of_measurement: "RPM"
     update_interval: 4s
@@ -121,7 +124,8 @@ sensor:
     pin:
       number: GPIO26
       mode: INPUT 
-    name: "风扇 4 转速"
+    name: "Fan 4 RPM"
+    friendly_name: "风扇 4 转速"
     id: fan4_rpm
     unit_of_measurement: "RPM"
     update_interval: 4s
@@ -131,13 +135,15 @@ sensor:
       - multiply: 0.5
 
   - platform: uptime
-    name: "设备运行时间"
+    name: "Uptime"
+    friendly_name: "设备运行时间"
     entity_category: "diagnostic"
     id: uptime_sensor
     update_interval: 60s
 
   - platform: wifi_signal
-    name: "Wi-Fi 信号强度"
+    name: "Wi-Fi Signal"
+    friendly_name: "Wi-Fi 信号强度"
     entity_category: "diagnostic"
     id: wifi_rssi
     update_interval: 60s
@@ -145,20 +151,24 @@ sensor:
 text_sensor:
   - platform: wifi_info
     ip_address:
-      name: "设备 IP 地址"
+      name: "Device IP"
+      friendly_name: "设备 IP 地址"
       entity_category: "diagnostic"
     ssid:
-      name: "连接 Wi-Fi SSID"
+      name: "Connected SSID"
+      friendly_name: "连接 Wi-Fi SSID"
       entity_category: "diagnostic"
 
   - platform: version
-    name: "ESPHome 版本"
+    name: "ESPHome Version"
+    friendly_name: "ESPHome 版本"
     entity_category: "diagnostic"
 
 fan:
   - platform: speed
     output: fan1_pwm
-    name: "风扇 1"
+    name: "Fan 1"
+    friendly_name: "风扇 1"
     speed_count: 100
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
@@ -170,7 +180,8 @@ fan:
 
   - platform: speed
     output: fan2_pwm
-    name: "风扇 2"
+    name: "Fan 2"
+    friendly_name: "风扇 2"
     speed_count: 100
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
@@ -182,7 +193,8 @@ fan:
 
   - platform: speed
     output: fan3_pwm
-    name: "风扇 3"
+    name: "Fan 3"
+    friendly_name: "风扇 3"
     speed_count: 100
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
@@ -194,7 +206,8 @@ fan:
 
   - platform: speed
     output: fan4_pwm
-    name: "风扇 4"
+    name: "Fan 4"
+    friendly_name: "风扇 4"
     speed_count: 100
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:

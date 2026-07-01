@@ -88,7 +88,8 @@ switch:
 
 select:
   - platform: template
-    name: "风扇1 温度源绑定 F1-Src"
+    name: "Fan1 Temp Source"
+    friendly_name: "风扇1 温度源绑定 F1-Src"
     id: f1_source
     optimistic: true
     options:
@@ -101,7 +102,8 @@ select:
     restore_value: true
 
   - platform: template
-    name: "风扇2 温度源绑定 F2-Src"
+    name: "Fan2 Temp Source"
+    friendly_name: "风扇2 温度源绑定 F2-Src"
     id: f2_source
     optimistic: true
     options:
@@ -114,7 +116,8 @@ select:
     restore_value: true
 
   - platform: template
-    name: "风扇3 温度源绑定 F3-Src"
+    name: "Fan3 Temp Source"
+    friendly_name: "风扇3 温度源绑定 F3-Src"
     id: f3_source
     optimistic: true
     options:
@@ -127,7 +130,8 @@ select:
     restore_value: true
 
   - platform: template
-    name: "风扇4 温度源绑定 F4-Src"
+    name: "Fan4 Temp Source"
+    friendly_name: "风扇4 温度源绑定 F4-Src"
     id: f4_source
     optimistic: true
     options:
@@ -142,7 +146,8 @@ select:
 number:
   # ------ 风扇 1 参数 ------
   - platform: template
-    name: "风扇1 启控温度 T-Min"
+    name: "Fan1 T-Min"
+    friendly_name: "风扇1 启控温度 T-Min"
     id: f1_t_min
     optimistic: true
     min_value: 10
@@ -151,7 +156,8 @@ number:
     initial_value: 30
     restore_value: true
   - platform: template
-    name: "风扇1 满载温度 T-Max"
+    name: "Fan1 T-Max"
+    friendly_name: "风扇1 满载温度 T-Max"
     id: f1_t_max
     optimistic: true
     min_value: 40
@@ -160,7 +166,8 @@ number:
     initial_value: 50
     restore_value: true
   - platform: template
-    name: "风扇1 最低风速 F-Min"
+    name: "Fan1 F-Min"
+    friendly_name: "风扇1 最低风速 F-Min"
     id: f1_f_min
     optimistic: true
     min_value: 0
@@ -170,7 +177,8 @@ number:
     initial_value: 0
     restore_value: true
   - platform: template
-    name: "风扇1 最高风速 F-Max"
+    name: "Fan1 F-Max"
+    friendly_name: "风扇1 最高风速 F-Max"
     id: f1_f_max
     optimistic: true
     min_value: 50
@@ -182,7 +190,8 @@ number:
 
   # ------ 风扇 2 参数 ------
   - platform: template
-    name: "风扇2 启控温度 T-Min"
+    name: "Fan2 T-Min"
+    friendly_name: "风扇2 启控温度 T-Min"
     id: f2_t_min
     optimistic: true
     min_value: 10
@@ -191,7 +200,8 @@ number:
     initial_value: 30
     restore_value: true
   - platform: template
-    name: "风扇2 满载温度 T-Max"
+    name: "Fan2 T-Max"
+    friendly_name: "风扇2 满载温度 T-Max"
     id: f2_t_max
     optimistic: true
     min_value: 40
@@ -200,7 +210,8 @@ number:
     initial_value: 50
     restore_value: true
   - platform: template
-    name: "风扇2 最低风速 F-Min"
+    name: "Fan2 F-Min"
+    friendly_name: "风扇2 最低风速 F-Min"
     id: f2_f_min
     optimistic: true
     min_value: 0
@@ -210,7 +221,8 @@ number:
     initial_value: 0
     restore_value: true
   - platform: template
-    name: "风扇2 最高风速 F-Max"
+    name: "Fan2 F-Max"
+    friendly_name: "风扇2 最高风速 F-Max"
     id: f2_f_max
     optimistic: true
     min_value: 50
@@ -222,7 +234,8 @@ number:
 
   # ------ 风扇 3 参数 ------
   - platform: template
-    name: "风扇3 启控温度 T-Min"
+    name: "Fan3 T-Min"
+    friendly_name: "风扇3 启控温度 T-Min"
     id: f3_t_min
     optimistic: true
     min_value: 10
@@ -231,7 +244,8 @@ number:
     initial_value: 30
     restore_value: true
   - platform: template
-    name: "风扇3 满载温度 T-Max"
+    name: "Fan3 T-Max"
+    friendly_name: "风扇3 满载温度 T-Max"
     id: f3_t_max
     optimistic: true
     min_value: 40
@@ -240,7 +254,8 @@ number:
     initial_value: 50
     restore_value: true
   - platform: template
-    name: "风扇3 最低风速 F-Min"
+    name: "Fan3 F-Min"
+    friendly_name: "风扇3 最低风速 F-Min"
     id: f3_f_min
     optimistic: true
     min_value: 0
@@ -250,7 +265,8 @@ number:
     initial_value: 0
     restore_value: true
   - platform: template
-    name: "风扇3 最高风速 F-Max"
+    name: "Fan3 F-Max"
+    friendly_name: "风扇3 最高风速 F-Max"
     id: f3_f_max
     optimistic: true
     min_value: 50
@@ -262,7 +278,8 @@ number:
 
   # ------ 风扇 4 参数 ------
   - platform: template
-    name: "风扇4 启控温度 T-Min"
+    name: "Fan4 T-Min"
+    friendly_name: "风扇4 启控温度 T-Min"
     id: f4_t_min
     optimistic: true
     min_value: 10
@@ -271,7 +288,8 @@ number:
     initial_value: 30
     restore_value: true
   - platform: template
-    name: "风扇4 满载温度 T-Max"
+    name: "Fan4 T-Max"
+    friendly_name: "风扇4 满载温度 T-Max"
     id: f4_t_max
     optimistic: true
     min_value: 40
@@ -280,7 +298,8 @@ number:
     initial_value: 50
     restore_value: true
   - platform: template
-    name: "风扇4 最低风速 F-Min"
+    name: "Fan4 F-Min"
+    friendly_name: "风扇4 最低风速 F-Min"
     id: f4_f_min
     optimistic: true
     min_value: 0
@@ -290,7 +309,8 @@ number:
     initial_value: 0
     restore_value: true
   - platform: template
-    name: "风扇4 最高风速 F-Max"
+    name: "Fan4 F-Max"
+    friendly_name: "风扇4 最高风速 F-Max"
     id: f4_f_max
     optimistic: true
     min_value: 50
@@ -361,25 +381,29 @@ sensor:
   # 4个温度传感器基础定义（仅负责读数，不内置联动）
   - platform: dallas_temp
     index: 0
-    name: "温度 A"
+    name: "Temperature A"
+    friendly_name: "温度 A"
     id: temp_a
     update_interval: 5s
 
   - platform: dallas_temp
     index: 1
-    name: "温度 B"
+    name: "Temperature B"
+    friendly_name: "温度 B"
     id: temp_b
     update_interval: 5s
 
   - platform: dallas_temp
     index: 2
-    name: "温度 C"
+    name: "Temperature C"
+    friendly_name: "温度 C"
     id: temp_c
     update_interval: 5s
 
   - platform: dallas_temp
     index: 3
-    name: "温度 D"
+    name: "Temperature D"
+    friendly_name: "温度 D"
     id: temp_d
     update_interval: 5s
 
@@ -388,7 +412,8 @@ sensor:
     pin:
       number: GPIO32
       mode: INPUT 
-    name: "风扇 1 转速"
+    name: "Fan 1 RPM"
+    friendly_name: "风扇 1 转速"
     id: fan1_rpm
     unit_of_measurement: "RPM"
     update_interval: 4s
@@ -401,7 +426,8 @@ sensor:
     pin:
       number: GPIO33
       mode: INPUT  
-    name: "风扇 2 转速"
+    name: "Fan 2 RPM"
+    friendly_name: "风扇 2 转速"
     id: fan2_rpm
     unit_of_measurement: "RPM"
     update_interval: 4s
@@ -414,7 +440,8 @@ sensor:
     pin:
       number: GPIO25
       mode: INPUT 
-    name: "风扇 3 转速"
+    name: "Fan 3 RPM"
+    friendly_name: "风扇 3 转速"
     id: fan3_rpm
     unit_of_measurement: "RPM"
     update_interval: 4s
@@ -427,7 +454,8 @@ sensor:
     pin:
       number: GPIO26
       mode: INPUT 
-    name: "风扇 4 转速"
+    name: "Fan 4 RPM"
+    friendly_name: "风扇 4 转速"
     id: fan4_rpm
     unit_of_measurement: "RPM"
     update_interval: 4s
@@ -437,13 +465,15 @@ sensor:
       - multiply: 0.5
 
   - platform: uptime
-    name: "设备运行时间"
+    name: "Uptime"
+    friendly_name: "设备运行时间"
     entity_category: "diagnostic"
     id: uptime_sensor
     update_interval: 60s
 
   - platform: wifi_signal
-    name: "Wi-Fi 信号强度"
+    name: "Wi-Fi Signal"
+    friendly_name: "Wi-Fi 信号强度"
     entity_category: "diagnostic"
     id: wifi_rssi
     update_interval: 60s
@@ -451,19 +481,23 @@ sensor:
 text_sensor:
   - platform: wifi_info
     ip_address:
-      name: "设备 IP 地址"
+      name: "Device IP"
+      friendly_name: "设备 IP 地址"
       entity_category: "diagnostic"
     ssid:
-      name: "连接 Wi-Fi SSID"
+      name: "Connected SSID"
+      friendly_name: "连接 Wi-Fi SSID"
       entity_category: "diagnostic"
   - platform: version
-    name: "ESPHome 版本"
+    name: "ESPHome Version"
+    friendly_name: "ESPHome 版本"
     entity_category: "diagnostic"
 
 fan:
   - platform: speed
     output: fan1_pwm
-    name: "风扇 1"
+    name: "Fan 1"
+    friendly_name: "风扇 1"
     id: my_fan1
     speed_count: 100
     restore_mode: RESTORE_DEFAULT_OFF
@@ -476,7 +510,8 @@ fan:
 
   - platform: speed
     output: fan2_pwm
-    name: "风扇 2"
+    name: "Fan 2"
+    friendly_name: "风扇 2"
     id: my_fan2
     speed_count: 100
     restore_mode: RESTORE_DEFAULT_OFF
@@ -489,7 +524,8 @@ fan:
 
   - platform: speed
     output: fan3_pwm
-    name: "风扇 3"
+    name: "Fan 3"
+    friendly_name: "风扇 3"
     id: my_fan3
     speed_count: 100
     restore_mode: RESTORE_DEFAULT_OFF
@@ -502,7 +538,8 @@ fan:
 
   - platform: speed
     output: fan4_pwm
-    name: "风扇 4"
+    name: "Fan 4"
+    friendly_name: "风扇 4"
     id: my_fan4
     speed_count: 100
     restore_mode: RESTORE_DEFAULT_OFF
