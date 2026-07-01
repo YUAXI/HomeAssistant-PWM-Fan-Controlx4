@@ -44,18 +44,64 @@ jobs:
       - name: Compile
         run: esphome compile ${{ matrix.path }}
 
-      - name: Find firmware files
+      - name: Collect firmware
         run: |
-          echo "=== ls workspace ==="
-          ls -la
-          echo "=== find firmware.bin ==="
-          find "$GITHUB_WORKSPACE" -name "firmware.bin" 2>/dev/null | head -10
-          find / -maxdepth 8 -name "firmware.bin" -not -path "*/cache/*" -not -path "/usr/*" -not -path "/proc/*" -not -path "/sys/*" 2>/dev/null | head -10
+          SRC_DIR=$(dirname "${{ matrix.path }}")
+          mkdir -p output
+          echo "Searching in: $SRC_DIR"
+          find "$SRC_DIR/.esphome" -name "firmware*.bin" -exec cp {} output/ \;
+          cd output
+          for f in *.bin; do
+            [ -f "$f" ] && mv "$f" "${{ matrix.name }}.$f"
+          done
+          echo "=== Output ==="
+          ls -lh
+          [ "$(ls -A)" ] && echo "OK" || (echo "No firmware found" && exit 1)
 
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: output/
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Get date
+        id: date
+        run: echo "tag=$(date +'%Y.%-m.%-d')" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.date.outputs.tag }}
+          name: ${{ steps.date.outputs.tag }}
+          body: |
+            ESP32 PWM Fan Controller ${{ steps.date.outputs.tag }}
+
+            **固件版本：**
+            - v1.0-dual-core — 双核版本
+            - v1.0-single-core — 单核版本
+            - v2.0-basic — 基础版本
+            - v2.0-ds18b20 — DS18B20 温度控制版本
+            - v2.0-ds18b20-radar — DS18B20 + 毫米波雷达版本
+
+            **文件类型说明：**
+            - `.firmware.bin` — 标准固件
+            - `.firmware.factory.bin` — 工厂固件
+            - `.firmware.ota.bin` — OTA 升级固件
+          files: artifacts/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
