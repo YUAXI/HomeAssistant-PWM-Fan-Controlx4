@@ -18,7 +18,7 @@ HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器�
 
 | 日期 | 更新内容 |
 |:-----|:---------|
-| 2026-07-01 | 全版本新增蓝牙代理功能；实体名称改为英文以简化 API 路径（`friendly_name` 保留中文显示）；README 重构 |
+| 2026-07-01 | 全版本新增蓝牙代理功能；README 重构 |
 | v2.0 | 内置 DS18B20 温度控制、毫米波雷达版本、v2.0 硬件设计 |
 | v1.0 | Web 界面控制、HTTP REST API、诊断实体 |
 
@@ -238,45 +238,35 @@ DS18B20 采用 3 线制连接，接口为板载 **GPIO14**（3PIN 排针）：
 本项目集成了 Web Server，可通过局域网 HTTP 请求直接控制风扇或获取传感器数据。
 
 > ⚠️ 控制类命令（打开/关闭/调速）使用 **POST**，状态获取使用 **GET**。
-> URL 中空格用 `%20` 编码。
+> URL 中中文名需进行 URL 编码（空格 → `%20`，中文 → UTF-8 编码）。
 
-### 实体名称对照
+### entity_id 对照
 
-| 实体 | entity_id | URL 路径 |
-|:-----|:----------|:---------|
-| 风扇 1 | `fan.fan_1` | `/fan/Fan%201` |
-| 风扇 2 | `fan.fan_2` | `/fan/Fan%202` |
-| 风扇 3 | `fan.fan_3` | `/fan/Fan%203` |
-| 风扇 4 | `fan.fan_4` | `/fan/Fan%204` |
-| 风扇 1 转速 | `sensor.fan_1_rpm` | `/sensor/Fan%201%20RPM` |
-| 风扇 2 转速 | `sensor.fan_2_rpm` | `/sensor/Fan%202%20RPM` |
-| 风扇 3 转速 | `sensor.fan_3_rpm` | `/sensor/Fan%203%20RPM` |
-| 风扇 4 转速 | `sensor.fan_4_rpm` | `/sensor/Fan%204%20RPM` |
+ESPHome 2026.6.4 中 `object_id` 不被大部分组件支持，entity_id 由 `name` 自动转换。
 
-### 接口列表
+| 实体显示名 | entity_id | URL 路径 |
+|:-----------|:----------|:---------|
+| 风扇 1 | `fan.风扇_1` | `/fan/%E9%A3%8E%E6%89%87_1` |
+| 风扇 1 转速 | `sensor.风扇_1_转速` | `/sensor/%E9%A3%8E%E6%89%87_1_%E8%BD%AC%E9%80%9F` |
 
-| 功能 | 方法 | URL |
-|:-----|:----:|:----|
-| 打开风扇 | `POST` | `http://[设备IP]/fan/Fan%20[编号]/turn_on` |
-| 关闭风扇 | `POST` | `http://[设备IP]/fan/Fan%20[编号]/turn_off` |
-| 风扇调速 | `POST` | `http://[设备IP]/fan/Fan%20[编号]/turn_on?speed_level=[1-100]` |
-| 获取转速 | `GET` | `http://[设备IP]/sensor/Fan%20[编号]%20RPM` |
-
-其中 `[编号]` 替换为 `1`、`2`、`3` 或 `4`。
+> **提示**：由于 entity_id 包含中文，推荐通过 Home Assistant 的 `fan.set_percentage` 服务调用，或在 Python 中使用 `urllib.parse.quote()` 自动编码。
 
 ### Python 调用示例
 
 ```python
 import requests
+from urllib.parse import quote
+
+base = "http://10.0.20.83"
 
 # 开启 2 号风扇并调整至 50% 风速
-requests.post("http://10.0.20.83/fan/Fan 2/turn_on", params={"speed_level": 50})
+requests.post(f"{base}/fan/{quote('风扇 2')}/turn_on", params={"speed_level": 50})
 
 # 关闭 2 号风扇
-requests.post("http://10.0.20.83/fan/Fan 2/turn_off")
+requests.post(f"{base}/fan/{quote('风扇 2')}/turn_off")
 
 # 获取 1 号风扇当前转速
-response = requests.get("http://10.0.20.83/sensor/Fan 1 RPM")
+response = requests.get(f"{base}/sensor/{quote('风扇 1 转速')}")
 if response.status_code == 200:
     print("当前转速:", response.json()['value'])
 ```
