@@ -101,11 +101,13 @@ HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器�
 
 | 使用场景 | 推荐版本 |
 |:---------|:---------|
-| 简单风扇控制，已有 HA 自动化 | [v1.0 双核](./firmware/v1.0/dual-core/) / [单核](./firmware/v1.0/single-core/) |
-| 需要本地温度控制，不依赖 HA 运行 | [v2.0 DS18B20](./firmware/v2.0/single-core/ds18b20/) |
-| 智能家居，需要人体感应控制 | [v2.0 DS18B20+雷达](./firmware/v2.0/single-core/ds18b20-radar/) |
+| 简单风扇控制，已有 HA 自动化 | v1.0 双核 / v1.0 单核 |
+| 需要本地温度控制，不依赖 HA 运行 | v2.0 DS18B20 |
+| 智能家居，需要人体感应控制 | v2.0 DS18B20+雷达 |
 | 长期运行，关注功耗 | v2.0 单核版本 |
-| 复杂应用，需要高性能 | [v1.0 双核版本](./firmware/v1.0/dual-core/) |
+| 复杂应用，需要高性能 | v1.0 双核版本 |
+
+> 固件文件不再存放在仓库中，请前往 [GitHub Releases](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/releases) 下载编译好的固件。Release 文件名中的版本标识与上表对应。
 
 ### 版本功能对比
 
