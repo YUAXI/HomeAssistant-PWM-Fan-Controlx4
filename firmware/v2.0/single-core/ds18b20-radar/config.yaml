@@ -405,7 +405,7 @@ interval:
           };
 
           auto calculate_speed = [](float current_t, float t_min, float t_max, float f_min, float f_max) -> int {
-            if (std::isnan(current_t)) return 100;
+            if (std::isnan(current_t)) return -1; // 传感器异常，返回 -1 表示保持当前风速
             if (current_t <= t_min) return (int)f_min;
             if (current_t >= t_max) return (int)f_max;
             float pct = ((current_t - t_min) * (f_max - f_min) / (t_max - t_min) + f_min);
@@ -416,28 +416,28 @@ interval:
           if (s1 != "未绑定") {
             float t1 = get_temp_by_source(s1);
             int v1 = calculate_speed(t1, id(f1_t_min).state, id(f1_t_max).state, id(f1_f_min).state, id(f1_f_max).state);
-            id(my_fan1).make_call().set_speed(v1).perform();
+            if (v1 >= 0) id(my_fan1).make_call().set_speed(v1).perform(); // v1 < 0 时不调速，保持当前风速
           }
 
           std::string s2 = id(f2_source).state;
           if (s2 != "未绑定") {
             float t2 = get_temp_by_source(s2);
             int v2 = calculate_speed(t2, id(f2_t_min).state, id(f2_t_max).state, id(f2_f_min).state, id(f2_f_max).state);
-            id(my_fan2).make_call().set_speed(v2).perform();
+            if (v2 >= 0) id(my_fan2).make_call().set_speed(v2).perform();
           }
 
           std::string s3 = id(f3_source).state;
           if (s3 != "未绑定") {
             float t3 = get_temp_by_source(s3);
             int v3 = calculate_speed(t3, id(f3_t_min).state, id(f3_t_max).state, id(f3_f_min).state, id(f3_f_max).state);
-            id(my_fan3).make_call().set_speed(v3).perform();
+            if (v3 >= 0) id(my_fan3).make_call().set_speed(v3).perform();
           }
 
           std::string s4 = id(f4_source).state;
           if (s4 != "未绑定") {
             float t4 = get_temp_by_source(s4);
             int v4 = calculate_speed(t4, id(f4_t_min).state, id(f4_t_max).state, id(f4_f_min).state, id(f4_f_max).state);
-            id(my_fan4).make_call().set_speed(v4).perform();
+            if (v4 >= 0) id(my_fan4).make_call().set_speed(v4).perform();
           }
 
 # ==========================================
