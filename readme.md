@@ -1,5 +1,7 @@
 # HomeAssistant-PWM-Fan-Controlx4
 
+<p align="center"><a href="readme.md">中文</a> · <a href="README_EN.md">English</a></p>
+
 ## 项目简介
 
 HomeAssistant-PWM-Fan-Controlx4 是一个基于 ESPHome 的 PWM 风扇控制器项目。该控制器支持接入 Home Assistant，实现 4 路风扇的独立调速与智能联动控制。
