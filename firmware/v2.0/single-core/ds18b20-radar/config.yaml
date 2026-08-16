@@ -412,51 +412,51 @@ interval:
             return (int)roundf(pct);
           };
 
-          std::string s1 = id(f1_source).state;
+          std::string s1 = id(f1_source).current_option();
           if (s1 != "未绑定") {
             float t1 = get_temp_by_source(s1);
             int v1 = calculate_speed(t1, id(f1_t_min).state, id(f1_t_max).state, id(f1_f_min).state, id(f1_f_max).state);
             if (v1 == -2) {
-              id(my_fan1).make_call().turn_off().perform(); // 温度过低，断电完全关停
+              id(my_fan1).make_call().set_state(false).perform(); // 温度过低，断电完全关停
             } else if (v1 >= 0) {
-              id(my_fan1).make_call().turn_on().perform();  // 确保风扇处于开启状态
+              id(my_fan1).make_call().set_state(true).perform();  // 确保风扇处于开启状态
               id(my_fan1).make_call().set_speed(v1).perform();
             }
             // v1 == -1 时不调速，保持当前状态
           }
 
-          std::string s2 = id(f2_source).state;
+          std::string s2 = id(f2_source).current_option();
           if (s2 != "未绑定") {
             float t2 = get_temp_by_source(s2);
             int v2 = calculate_speed(t2, id(f2_t_min).state, id(f2_t_max).state, id(f2_f_min).state, id(f2_f_max).state);
             if (v2 == -2) {
-              id(my_fan2).make_call().turn_off().perform();
+              id(my_fan2).make_call().set_state(false).perform();
             } else if (v2 >= 0) {
-              id(my_fan2).make_call().turn_on().perform();
+              id(my_fan2).make_call().set_state(true).perform();
               id(my_fan2).make_call().set_speed(v2).perform();
             }
           }
 
-          std::string s3 = id(f3_source).state;
+          std::string s3 = id(f3_source).current_option();
           if (s3 != "未绑定") {
             float t3 = get_temp_by_source(s3);
             int v3 = calculate_speed(t3, id(f3_t_min).state, id(f3_t_max).state, id(f3_f_min).state, id(f3_f_max).state);
             if (v3 == -2) {
-              id(my_fan3).make_call().turn_off().perform();
+              id(my_fan3).make_call().set_state(false).perform();
             } else if (v3 >= 0) {
-              id(my_fan3).make_call().turn_on().perform();
+              id(my_fan3).make_call().set_state(true).perform();
               id(my_fan3).make_call().set_speed(v3).perform();
             }
           }
 
-          std::string s4 = id(f4_source).state;
+          std::string s4 = id(f4_source).current_option();
           if (s4 != "未绑定") {
             float t4 = get_temp_by_source(s4);
             int v4 = calculate_speed(t4, id(f4_t_min).state, id(f4_t_max).state, id(f4_f_min).state, id(f4_f_max).state);
             if (v4 == -2) {
-              id(my_fan4).make_call().turn_off().perform();
+              id(my_fan4).make_call().set_state(false).perform();
             } else if (v4 >= 0) {
-              id(my_fan4).make_call().turn_on().perform();
+              id(my_fan4).make_call().set_state(true).perform();
               id(my_fan4).make_call().set_speed(v4).perform();
             }
           }
