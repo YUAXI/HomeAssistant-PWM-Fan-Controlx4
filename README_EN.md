@@ -2,303 +2,186 @@
 
 <p align="center"><a href="README_EN.md">English</a> · <a href="readme.md">中文</a></p>
 
-## Project Overview
+An ESPHome-based 4-channel PWM fan controller with Home Assistant integration, a Web control panel, and an HTTP REST API. Each fan can be controlled and monitored independently. The v2.0 firmware also supports DS18B20 temperature control and LD2402G mmWave radar expansion.
 
-HomeAssistant-PWM-Fan-Controlx4 is an ESPHome-based PWM fan controller project. It integrates with Home Assistant to provide independent speed control and intelligent联动 (linked) control for 4 fan channels.
+## 1. Firmware Versions and Downloads
 
-**Key Features:**
+### 1.1 Check the Hardware First
 
-- Home Assistant control via ESPHome integration
-- 4-channel independent PWM speed control with real-time RPM display (1-100%), supporting **full fan shutdown**
-- Web UI / HTTP REST API direct control
-- Built-in diagnostic entities (uptime, Wi-Fi signal strength, IP address, firmware version, etc.)
-- v2.0 provides DS18B20 temperature sensor interface, supporting **local temperature-driven speed regulation** (also configurable via HA automation)
-- v2.0 Radar version supports 24GHz mmWave human presence detection
-- All versions support **BLE Proxy**, extending Home Assistant Bluetooth coverage
+Make sure the firmware matches the controller hardware before flashing:
 
-## Changelog
+> **Finished devices usually use a single-core design. They can only run `v1.0 Single-Core` or any `v2.0` firmware. Do not flash `v1.0 Dual-Core` firmware to a single-core device, or it will fail to boot.**
 
-| Date | Changes |
-|:-----|:--------|
-| 2026-07-10 | On DS18B20 temperature read failure, maintain current fan speed instead of full-speed protection |
-| 2026-07-01 | BLE Proxy added across all versions; CI auto-build and Release publishing; pre-built firmware removed from repo; README restructured |
-| v2.0 | Built-in DS18B20 temperature control, mmWave radar variant, v2.0 hardware design |
-| v1.0 | Web UI control, HTTP REST API, diagnostic entities |
+### 1.2 Firmware Selection
 
-## Project Gallery
+| Firmware | CPU | Main Features | Recommended Use |
+|:---------|:---:|:--------------|:----------------|
+| **v1.0 Dual-Core** | Dual-core | 4-channel fan control, RPM display, Web UI, HTTP API, diagnostics, BLE Proxy | Confirmed dual-core hardware requiring higher performance |
+| **v1.0 Single-Core** | Single-core | 4-channel fan control, RPM display, Web UI, HTTP API, diagnostics, BLE Proxy | v1.0 single-core hardware using HA automation for temperature control |
+| **v2.0 Basic** | Single-core | Basic 4-channel fan control, RPM display, Web UI, HTTP API, diagnostics, BLE Proxy | v2.0 hardware without local temperature or radar control |
+| **v2.0 DS18B20** | Single-core | v2.0 Basic features + up to 4 DS18B20 sensors + local automatic speed control | Standalone cooling for servers, racks, and NAS devices |
+| **v2.0 DS18B20 + Radar** | Single-core | DS18B20 features + LD2402G 24GHz mmWave presence detection | Smart home scenarios requiring presence-based fan automation |
 
-<div style="text-align: center;">
-  <table>
-    <tr>
-      <td width="25%" style="padding: 10px;">
-        <img src="./docs/images/hardware/pcb.jpg" width="450" alt="PCB Board"/>
-      </td>
-      <td width="25%" style="padding: 10px;">
-        <img src="./docs/images/hardware/physical.jpg" width="450" alt="Test Setup"/>
-      </td>
-      <td width="25%" style="padding: 10px;">
-        <img src="./docs/images/screenshots/ha01.png" width="250" alt="Home Assistant Control UI"/>
-      </td>
-      <td width="25%" style="padding: 10px;">
-        <img src="./docs/images/screenshots/ha02.png" width="250" alt="Home Assistant Device Diagnostics"/>
-      </td>
-    </tr>
-  </table>
-</div>
+All firmware variants support:
 
----
+- Independent PWM control of 4 fans from 1-100%, including complete power shutdown.
+- RPM readings for all 4 fans.
+- Home Assistant ESPHome integration, a Web control panel, and an HTTP REST API.
+- Diagnostic entities for uptime, Wi-Fi signal, IP address, SSID, and ESPHome version.
+- BLE Proxy for extending Home Assistant Bluetooth coverage.
 
-## Hardware Files
+### 1.3 Feature Comparison
 
-### v2.0 Hardware (Recommended)
-
-| Type | File | Description |
-|:-----|:-----|:------------|
-| PCB Gerber | [gerber.zip](./hardware/v2.0/pcb/gerber.zip) | Ready for PCB fabrication |
-| BOM | [bom.xlsx](./hardware/v2.0/pcb/bom.xlsx) | Bill of Materials |
-| EDA Project | [project.epro2](./hardware/v2.0/pcb/project.epro2) | LCSC EDA Professional Edition |
-| Enclosure Body | [case.STEP](./hardware/v2.0/3d-models/print/case.STEP) | STEP format 3D model |
-| Top Cover | [top-cover.STEP](./hardware/v2.0/3d-models/print/top-cover.STEP) | STEP format 3D model |
-
-### v1.0 Hardware
-
-| Type | File |
-|:-----|:-----|
-| PCB Gerber | [gerber.zip](./hardware/v1.0/pcb/gerber.zip) |
-| BOM | [bom.xlsx](./hardware/v1.0/pcb/bom.xlsx) |
-| EDA Project | [project.epro2](./hardware/v1.0/pcb/project.epro2) |
-| Enclosure Body | [case.step](./hardware/v1.0/3d-models/print/case.step) |
-| Top Cover | [top-cover.step](./hardware/v1.0/3d-models/print/top-cover.step) |
-
----
-
-## Hardware Design
-
-- **Fan power control**: Uses `TPS22810DBVR` to completely cut off fan power, achieving **full shutdown** — solving the issue where ordinary PWM controllers cannot fully stop fans
-- **Power scheme**: 12V → 5V (`TPS5430DDAR` DC-DC) → 3.3V (`AMS1117-3.3`), high efficiency, low ripple
-- **USB-to-Serial**: Onboard `CH340C`, flashing via Type-C connection
-
-## IO Pin Mapping
-
-| Fan | PWM Output | Tach Input | Power Management |
-|:---:|:----------:|:----------:|:----------------:|
-| Fan1 | GPIO16     | GPIO32     | GPIO21           |
-| Fan2 | GPIO17     | GPIO33     | GPIO22           |
-| Fan3 | GPIO18     | GPIO25     | GPIO23           |
-| Fan4 | GPIO19     | GPIO26     | GPIO13           |
-
-**v2.0 Additional Interfaces**:
-
-| Interface | Description |
-|:----------|:------------|
-| GPIO14 (3-pin header) | DS18B20 temperature sensor 1-Wire bus |
-| 4-pin Developer Header (5V / GND / GPIO5 / GPIO4) | General-purpose expansion interface, compatible with LD2402G radar, RS485 modules, etc. The Radar firmware variant uses this interface with LD2402G as a reference implementation |
-
----
-
-## Firmware Versions
-
-> ⚠️ If you purchased a finished device, the MCU uses a **single-core design** — **only flash v1.0 single-core or any v2.0 firmware**. Dual-core firmware will inevitably fail to boot.
-
-### Version Overview
-
-| Version | Key Feature | Use Case |
-|:--------|:------------|:---------|
-| **v1.0 Dual-Core** | Basic 4-channel fan control, dual-core operation | For users with existing HA automation needing higher performance |
-| **v1.0 Single-Core** | Basic 4-channel fan control, single-core low power | For users with existing HA automation, power-sensitive |
-| **v2.0 Basic** | Simple fan control, single-core | Entry-level firmware for v2.0 hardware without temperature or radar needs |
-| **v2.0 DS18B20** | Built-in DS18B20 temperature control, auto-speed without HA dependency | Server/rack/NAS cooling requiring standalone operation |
-| **v2.0 DS18B20+Radar** | Above features + 24GHz mmWave human presence detection | Smart home scenarios needing presence-triggered fan control |
-
-### Feature Comparison
-
-| Feature | v1.0 Dual-Core | v1.0 Single-Core | v2.0 Basic | v2.0 DS18B20 | v2.0 +Radar |
-|:--------|:--------------:|:----------------:|:----------:|:------------:|:-----------:|
-| 4-Channel PWM Fan Control | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Real-time RPM Display | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Feature | v1.0 Dual-Core | v1.0 Single-Core | v2.0 Basic | v2.0 DS18B20 | v2.0 + Radar |
+|:--------|:--------------:|:----------------:|:----------:|:------------:|:------------:|
+| 4-channel PWM fan control | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Complete power shutdown | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Real-time RPM display | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Web UI / HTTP API | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Diagnostic Entities | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Diagnostic entities | ✅ | ✅ | ✅ | ✅ | ✅ |
 | BLE Proxy | ✅ | ✅ | ✅ | ✅ | ✅ |
-| DS18B20 Temperature Control | - | - | - | ✅ | ✅ |
-| mmWave Radar | - | - | - | - | ✅ |
-| CPU Cores | Dual-Core | Single-Core | Single-Core | Single-Core | Single-Core |
+| DS18B20 temperature control | - | - | - | ✅ | ✅ |
+| LD2402G mmWave radar | - | - | - | - | ✅ |
 
-### How to Get Firmware
+### 1.4 Download Pre-built Firmware
 
-Firmware is automatically compiled and published by GitHub Actions — no manual packaging needed:
+Firmware is compiled and published automatically by GitHub Actions:
 
-[→ Go to Releases](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/releases)
+[Go to GitHub Releases](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/releases)
 
-Each Release contains three firmware files per variant:
-
-| Release Filename | Corresponding Version |
-|:-----------------|:----------------------|
-| `v1.0-dual-core.firmware.bin` | v1.0 Dual-Core |
-| `v1.0-single-core.firmware.bin` | v1.0 Single-Core |
-| `v2.0-basic.firmware.bin` | v2.0 Basic |
-| `v2.0-ds18b20.firmware.bin` | v2.0 DS18B20 |
-| `v2.0-ds18b20-radar.firmware.bin` | v2.0 DS18B20+Radar |
-
-Each firmware variant includes 3 files:
+Each firmware variant includes these 3 file types:
 
 | File Suffix | Purpose |
 |:------------|:--------|
-| `.firmware.bin` | Standard firmware, regular flashing |
-| `.firmware.factory.bin` | Factory firmware, full factory reset |
-| `.firmware.ota.bin` | OTA upgrade firmware |
+| `.firmware.bin` | Standard firmware for regular flashing |
+| `.firmware.factory.bin` | Factory firmware for a complete factory reset |
+| `.firmware.ota.bin` | OTA upgrade firmware for networked devices |
 
-**Flashing method**: Connect via Type-C to your computer, use the ESPHome flashing tool or esptool.
+Release names and their corresponding configuration files:
 
-**Custom Compilation**: If you need to modify the configuration, use the `.yaml` files in the source code:
+| Release Name | Configuration File |
+|:-------------|:-------------------|
+| `v1.0-dual-core` | `firmware/v1.0/dual-core/config.yaml` |
+| `v1.0-single-core` | `firmware/v1.0/single-core/config.yaml` |
+| `v2.0-basic` | `firmware/v2.0/single-core/basic/config.yaml` |
+| `v2.0-ds18b20` | `firmware/v2.0/single-core/ds18b20/config.yaml` |
+| `v2.0-ds18b20-radar` | `firmware/v2.0/single-core/ds18b20-radar/config.yaml` |
 
-| Version | Config File |
-|:--------|:------------|
-| v1.0 Dual-Core | `firmware/v1.0/dual-core/config.yaml` |
-| v1.0 Single-Core | `firmware/v1.0/single-core/config.yaml` |
-| v2.0 Basic | `firmware/v2.0/single-core/basic/config.yaml` |
-| v2.0 DS18B20 | `firmware/v2.0/single-core/ds18b20/config.yaml` |
-| v2.0 DS18B20+Radar | `firmware/v2.0/single-core/ds18b20-radar/config.yaml` |
+### 1.5 Custom Compilation
 
----
+To change Wi-Fi, entity names, or other ESPHome settings, edit the corresponding `config.yaml` above and compile or flash it with ESPHome. All configurations use the ESP32 DevKit board and the ESP-IDF framework; v1.0 Single-Core and all v2.0 firmware explicitly enable single-core operation.
 
-## Quick Start Guide
+## 2. Quick Start
 
-> **API Encryption Key**: `LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk=`
-
-### 1. Power Supply & Startup
+### 2.1 Power Supply
 
 | Power Method | Interface | Voltage | Description |
 |:-------------|:----------|:--------|:------------|
-| **DC Jack** (Recommended) | DC Barrel | 12V/2A+ | Normal operation; powers both fans and ESP32 |
-| Type-C Port | USB-C | 5V | Flashing/debugging only; fans will not operate |
+| **DC jack (recommended)** | DC barrel jack | 12V / 2A or higher | Normal operation; powers the fans and ESP32 |
+| Type-C port | USB-C | 5V | Flashing and debugging only; cannot drive the fans normally |
 
-On power-up, the device automatically creates a Wi-Fi hotspot named `ESP32-Fan-22810` (no password). Connect with your phone or computer to begin network configuration.
+### 2.2 First-time Wi-Fi Setup
 
-### 2. Connect to Wi-Fi
+After startup, the device creates an open Wi-Fi hotspot named `ESP32-Fan-22810`:
 
-1. Connect to the `ESP32-Fan-22810` hotspot
-2. Open a browser and visit `http://192.168.4.1` or `http://esp32pwm22810.local`
-3. In the Wi-Fi configuration wizard, select your home/office Wi-Fi and enter the password
-4. The device will automatically connect and reboot
+1. Connect to `ESP32-Fan-22810` with a phone or computer.
+2. Open `http://192.168.4.1` or `http://esp32pwm22810.local` in a browser.
+3. Select the target Wi-Fi network and enter its password.
+4. The device connects and reboots automatically.
 
-> **Tip**: Pre-configure `wifi.ssid` and `wifi.password` in `config.yaml` before flashing, and the device will auto-connect on first boot.
+To skip first-time setup, set `wifi.ssid` and `wifi.password` in the configuration file before flashing.
 
-### 3. Add to Home Assistant
+### 2.3 Flash the Firmware
 
-Ensure the ESPHome integration is installed, then:
+Connect the device to a computer with a Type-C cable, select the firmware matching the hardware, and flash it with the ESPHome flashing tool or `esptool`. Once the device is online, use `.firmware.ota.bin` for remote updates.
 
-1. **Settings** → **Devices & Services** → **Add Integration** → Search for **ESPHome**
-2. The device named `ESP32 PWM 22810` will be auto-discovered (or enter the IP manually)
-3. Enter the API key and submit
+### 2.4 Add the Device to Home Assistant
 
-Entities auto-created after successful addition:
+Make sure the Home Assistant ESPHome integration is installed:
+
+1. Open **Settings → Devices & Services → Add Integration** and search for **ESPHome**.
+2. Select the discovered device `ESP32 PWM 22810`, or enter its IP address manually.
+3. Enter the API encryption key from the configuration files:
+
+   ```text
+   LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk=
+   ```
+
+The following entities are normally created:
 
 | Entity Type | Count | Description |
 |:------------|:-----:|:------------|
-| Fan | 4 | Supports on/off and 1-100% speed adjustment |
-| Temperature Sensor | 4 | Temperature A/B/C/D (v2.0, requires DS18B20 connection) |
-| Speed Sensor | 4 | Unit: RPM |
+| Fan | 4 | Independent on/off and 1-100% speed control |
+| RPM sensor | 4 | Unit: RPM |
+| Temperature sensor | 4 | Only in v2.0 DS18B20 and Radar firmware; Temperature A/B/C/D |
 | BLE Proxy | 1 | BLE Proxy node |
-| Diagnostic Entities | Several | Uptime, Wi-Fi signal, IP, firmware version, etc. |
+| Diagnostic entities | Several | Uptime, Wi-Fi signal, IP, SSID, ESPHome version, etc. |
 
-### 4. Web UI Control
+### 2.5 Web Control Panel
 
-Browse to `http://[device-ip]` to access the Web control panel — no Home Assistant required:
-- View real-time status of all 4 fans
-- Independently adjust each fan speed (1-100%) via sliders
-- View device runtime information
+Open `http://device-ip` in a browser to access the Web control panel without Home Assistant. The panel shows all 4 fan states, allows independent speed adjustment, and displays device information.
 
-### 5. Configuring v2.0 Temperature Control (DS18B20 Variant)
+## 3. v2.0 Temperature and Radar Features
 
-> This section applies to **v2.0 DS18B20 / DS18B20+Radar** firmware. If you are not using a DS18B20 probe, you can implement temperature-linked speed control via [Home Assistant automation](#home-assistant-automation-configuration).
+### 3.1 DS18B20 Wiring
 
-#### DS18B20 Wiring
-
-The DS18B20 uses a 3-wire connection to the onboard **GPIO14** (3-pin header):
+Connect DS18B20 sensors to the onboard **GPIO14** 3-pin header using the 1-Wire bus:
 
 | DS18B20 Pin | Connection |
 |:-----------:|:-----------|
-| Red (VCC) | 3.3V or 5V |
-| Black (GND) | GND |
-| Yellow (DATA) | GPIO14 (onboard pull-up resistor pre-installed) |
+| VCC | 3.3V or 5V |
+| GND | GND |
+| DATA | GPIO14 |
 
-Up to **4 DS18B20 sensors** can be paralleled on the GPIO14 bus. They are auto-detected and named **Temperature A / B / C / D**.
+The board includes a pull-up resistor. Up to 4 DS18B20 sensors can be connected in parallel to GPIO14 and are named **Temperature A, Temperature B, Temperature C, and Temperature D** according to their bus index.
 
-#### Temperature Binding Configuration
+### 3.2 Local Temperature Control
 
-Navigate to HA → **Settings** → **Devices & Services** → **ESP32 PWM 22810**, and configure each fan's parameters:
+This section applies to `v2.0-ds18b20` and `v2.0-ds18b20-radar`. In the Home Assistant device page for **ESP32 PWM 22810**, configure a temperature source and parameters for each fan:
 
 | Parameter | Description | Default |
 |:----------|:------------|:-------:|
-| Trigger Temp T-Min | Below this temperature, fan runs at minimum speed | 30°C |
-| Full-Speed Temp T-Max | Above this temperature, fan runs at maximum speed | 50°C |
-| Min Speed F-Min | Minimum fan speed percentage | 0% |
-| Max Speed F-Max | Maximum fan speed percentage | 100% |
-| Temp Source Src | Temperature sensor bound to this fan | - |
+| Temperature source `F-Src` | Select unbound or Temperature A/B/C/D | Fans 1-4 use A-D respectively |
+| Trigger temperature `T-Min` | At or below this temperature, power the fan off | 30°C |
+| Full-speed temperature `T-Max` | At or above this temperature, use the maximum speed | 50°C |
+| Minimum speed `F-Min` | Minimum speed in the linear control range | 0% |
+| Maximum speed `F-Max` | Maximum speed in the linear control range | 100% |
 
-**Operating Logic**:
+Control logic:
 
-```
-Temperature ≤ Trigger Temp  →  Run at minimum speed (or stop)
-Trigger Temp < Temperature < Full-Speed Temp  →  Linear proportional speed control
-Temperature ≥ Full-Speed Temp  →  Run at maximum speed
-```
-
-All parameters are **persistent across power loss** — set once and done.
-
----
-
-## HTTP REST API
-
-This project includes a Web Server that allows direct fan control and sensor data retrieval via LAN HTTP requests.
-
-> ⚠️ Control commands (turn on/off, speed adjustment) use **POST**; status retrieval uses **GET**.
-> Chinese characters in URLs must be URL-encoded (space → `%20`, Chinese text → UTF-8 encoding).
-
-### entity_id Reference
-
-As of ESPHome 2026.6.4, `object_id` is not supported by most components; `entity_id` is auto-derived from `name`.
-
-| Display Name | entity_id | URL Path |
-|:-------------|:----------|:---------|
-| 风扇 1 (Fan 1) | `fan.风扇_1` | `/fan/%E9%A3%8E%E6%89%87_1` |
-| 风扇 1 转速 (Fan 1 RPM) | `sensor.风扇_1_转速` | `/sensor/%E9%A3%8E%E6%89%87_1_%E8%BD%AC%E9%80%9F` |
-
-> **Note**: Since entity IDs contain Chinese characters, it is recommended to use Home Assistant's `fan.set_percentage` service, or use `urllib.parse.quote()` in Python for automatic encoding.
-
-### Python Example
-
-```python
-import requests
-from urllib.parse import quote
-
-base = "http://10.0.20.83"
-
-# Turn on Fan 2 and set speed to 50%
-requests.post(f"{base}/fan/{quote('风扇 2')}/turn_on", params={"speed_level": 50})
-
-# Turn off Fan 2
-requests.post(f"{base}/fan/{quote('风扇 2')}/turn_off")
-
-# Get current RPM of Fan 1
-response = requests.get(f"{base}/sensor/{quote('风扇 1 转速')}")
-if response.status_code == 200:
-    print("Current RPM:", response.json()['value'])
+```text
+Temperature ≤ T-Min                   → Completely power off the fan
+T-Min < Temperature < T-Max           → Linear proportional speed control
+Temperature ≥ T-Max                   → Run at F-Max
+Temperature read failure              → Keep the current speed and state
 ```
 
----
+These parameters persist across power cycles. A fan with no bound temperature source is not controlled by the local temperature logic and can still be controlled manually through Home Assistant, the Web UI, or the HTTP API.
 
-## Home Assistant Automation Configuration
+### 3.3 LD2402G Radar Interface
 
-> **v2.0 users**: The DS18B20 variant has built-in local temperature control, but the following automation method is also available. This configuration applies to all versions, and is especially suitable for v1.0 users or those needing non-DS18B20 temperature sources such as CPU temperature, ambient temperature/humidity from HA.
+The radar UART is enabled only by `v2.0-ds18b20-radar`:
 
-### Configuration Steps
+| Radar Pin | Controller Pin |
+|:----------|:---------------|
+| TX | GPIO4 (UART RX) |
+| RX | GPIO5 (UART TX) |
+| Power / Ground | 5V / GND on the v2.0 developer header |
 
-1. Open Home Assistant → **Automations & Scenes** → **Create Automation**
-2. Click **More** (top-right) → **Edit in YAML**
-3. Paste the template below, **modify the entity IDs**, and save
+The UART speed is `115200`. The radar firmware provides target presence and target distance entities, plus configurable minimum and maximum distance filters. The default range is `0.10-1.5 m`. Use Home Assistant automations to link radar presence with fan and temperature control.
 
-### YAML Template
+## 4. Home Assistant Temperature Automation
+
+The v2.0 DS18B20 firmware already supports local temperature control. The following method works with all firmware versions and is especially useful for v1.0 or for external temperature sources such as CPU and ambient temperature sensors exposed by Home Assistant.
+
+### 4.1 Configuration Steps
+
+1. Open Home Assistant → **Automations & Scenes → Create Automation**.
+2. Select **More → Edit in YAML** in the top-right corner.
+3. Paste the template below.
+4. Replace the temperature sensor and fan entity IDs, then save.
+
+### 4.2 YAML Template
 
 ```yaml
 alias: "Smart Fan Linear Speed Control"
@@ -307,23 +190,23 @@ mode: restart
 
 trigger:
   - platform: state
-    entity_id: sensor.nas_temperature_x86_pkg_temp  # 【MODIFY THIS】
+    entity_id: sensor.nas_temperature_x86_pkg_temp  # Change this
 
 condition:
   - condition: template
-    value_template: "{{ is_number(states('sensor.nas_temperature_x86_pkg_temp')) }}"  # 【MODIFY THIS】
+    value_template: "{{ is_number(states('sensor.nas_temperature_x86_pkg_temp')) }}"  # Change this
 
 action:
   - service: fan.set_percentage
     target:
-      entity_id: fan.fan_1  # 【MODIFY THIS】
+      entity_id: fan.fan_1  # Change this
     data:
       percentage: >
-        {% set current_temp = states('sensor.nas_temperature_x86_pkg_temp') | float(0) %}  {# 【MODIFY THIS】 #}
-        {% set t_min = 30 %}   {# Trigger temperature #}
-        {% set t_max = 50 %}   {# Full-speed temperature #}
-        {% set f_min = 0 %}    {# Minimum speed % #}
-        {% set f_max = 100 %}  {# Maximum speed % #}
+        {% set current_temp = states('sensor.nas_temperature_x86_pkg_temp') | float(0) %}  {# Change this #}
+        {% set t_min = 30 %}
+        {% set t_max = 50 %}
+        {% set f_min = 0 %}
+        {% set f_max = 100 %}
         {% if current_temp <= t_min %}
           {{ f_min }}
         {% elif current_temp >= t_max %}
@@ -334,43 +217,123 @@ action:
         {% endif %}
 ```
 
-### Temperature vs Speed Relationship
+![Temperature vs. Speed](./docs/images/diagrams/speed-chart.png)
 
-![Temperature vs Speed Chart](./docs/images/diagrams/speed-chart.png)
+Common temperature source examples:
 
-### Common Temperature Sources
+| Temperature Source | Integration | Example Entity ID |
+|:-------------------|:------------|:------------------|
+| PC / server CPU | Glances | `sensor.nas_temperature_x86_pkg_temp` |
+| Temperature / humidity sensor | Zigbee2MQTT / ZHA | `sensor.temperature_humidity_sensor_temperature` |
+| Air conditioner / heater | Smart AC integration | `climate.living_air_conditioner` |
+| Synology NAS | Synology DSM integration | `sensor.synology_disk_1_temperature` |
+| Other ESPHome device | ESPHome integration | Use the actual entity ID |
 
-| Temperature Source | Integration Method | Example Entity ID |
-|:------------------|:-------------------|:------------------|
-| PC/Server CPU Temperature | Glances Integration | `sensor.nas_temperature_x86_pkg_temp` |
-| Temperature/Humidity Sensor | Zigbee2MQTT / ZHA | `sensor.temperature_humidity_sensor_temperature` |
-| AC/Heater Temperature | Smart AC Integration | `climate.living_air_conditioner` |
-| Synology NAS Temperature | Synology DSM Integration | `sensor.synology_disk_1_temperature` |
-| Other ESPHome Devices | ESPHome Integration | Custom |
+## 5. HTTP REST API
 
----
+The built-in Web Server accepts LAN HTTP requests for fan control and sensor readings. Use **POST** for control commands and **GET** for status queries. Entity names contain Chinese characters, so URL paths must be UTF-8 encoded.
 
-## Community
+### 5.1 Entity and Path Examples
 
-**QR codes for community groups are no longer maintained.**
+ESPHome generates entity IDs from the configured `name`. The following examples show Fan 1:
 
-## Support the Project
+| Entity Name | entity_id | URL Path |
+|:------------|:----------|:---------|
+| Fan 1 | `fan.风扇_1` | `/fan/%E9%A3%8E%E6%89%87_1` |
+| Fan 1 RPM | `sensor.风扇_1_转速` | `/sensor/%E9%A3%8E%E6%89%87_1_%E8%BD%AC%E9%80%9F` |
+
+Replace the entity name in the path for other fans. Alternatively, use Home Assistant's `fan.set_percentage` service to avoid handling Chinese URL encoding manually.
+
+### 5.2 Python Example
+
+```python
+import requests
+from urllib.parse import quote
+
+base = "http://10.0.20.83"  # Replace with the device IP
+
+# Turn on Fan 2 and set it to 50%
+requests.post(f"{base}/fan/{quote('风扇 2')}/turn_on", params={"speed_level": 50})
+
+# Turn off Fan 2
+requests.post(f"{base}/fan/{quote('风扇 2')}/turn_off")
+
+# Read the RPM of Fan 1
+response = requests.get(f"{base}/sensor/{quote('风扇 1 转速')}")
+if response.status_code == 200:
+    print("Current RPM:", response.json()["value"])
+```
+
+## 6. Hardware Files and Interfaces
+
+### 6.1 Hardware Files
+
+v2.0 is the recommended hardware version:
+
+| Type | v2.0 File | v1.0 File |
+|:-----|:----------|:----------|
+| PCB Gerber | [gerber.zip](./hardware/v2.0/pcb/gerber.zip) | [gerber.zip](./hardware/v1.0/pcb/gerber.zip) |
+| BOM | [bom.xlsx](./hardware/v2.0/pcb/bom.xlsx) | [bom.xlsx](./hardware/v1.0/pcb/bom.xlsx) |
+| LCSC EDA project | [project.epro2](./hardware/v2.0/pcb/project.epro2) | [project.epro2](./hardware/v1.0/pcb/project.epro2) |
+| Enclosure body | [case.STEP](./hardware/v2.0/3d-models/print/case.STEP) | [case.step](./hardware/v1.0/3d-models/print/case.step) |
+| Top cover | [top-cover.STEP](./hardware/v2.0/3d-models/print/top-cover.STEP) | [top-cover.step](./hardware/v1.0/3d-models/print/top-cover.step) |
+
+### 6.2 Fan Pin Mapping
+
+| Fan | PWM Output | Tachometer Input | Power Management |
+|:---:|:----------:|:----------------:|:----------------:|
+| Fan1 | GPIO16 | GPIO32 | GPIO21 |
+| Fan2 | GPIO17 | GPIO33 | GPIO22 |
+| Fan3 | GPIO18 | GPIO25 | GPIO23 |
+| Fan4 | GPIO19 | GPIO26 | GPIO13 |
+
+Additional v2.0 interfaces:
+
+| Interface | Description |
+|:----------|:------------|
+| GPIO14 (3-pin header) | DS18B20 1-Wire temperature bus |
+| 4-pin developer header (5V / GND / GPIO5 / GPIO4) | Expansion for LD2402G radar, RS485, and other peripherals |
+
+### 6.3 Hardware Design Highlights
+
+- **Fan power control**: `TPS22810DBVR` directly cuts fan power for complete shutdown.
+- **Power scheme**: 12V → 5V (`TPS5430DDAR` DC-DC) → 3.3V (`AMS1117-3.3`).
+- **USB-to-Serial**: Onboard `CH340C` for flashing and debugging over Type-C.
+
+## 7. Project Gallery
 
 <div style="text-align: center;">
   <table>
     <tr>
-      <td width="50%" style="padding: 10px;">
-        <img src="./docs/images/donations/wechat.jpg" width="220" alt="WeChat Pay"/>
-        <p><small>WeChat Pay</small></p>
-      </td>
-      <td width="50%" style="padding: 10px;">
-        <img src="./docs/images/donations/alipay.jpg" width="220" alt="Alipay"/>
-        <p><small>Alipay</small></p>
-      </td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/pcb.jpg" width="450" alt="PCB board"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/physical.jpg" width="450" alt="Test setup"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha01.png" width="250" alt="Home Assistant control interface"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha02.png" width="250" alt="Home Assistant device diagnostics"/></td>
     </tr>
   </table>
 </div>
 
-## Open Source License
+## 8. Changelog
+
+| Date | Changes |
+|:-----|:--------|
+| 2026-08-16 | Fans are powered off when automatic control temperature is at or below `T-Min`, and restart when the temperature rises. |
+| 2026-07-10 | On DS18B20 read failure, keep the current fan speed and remove forced full-speed protection. |
+| 2026-07-01 | Added BLE Proxy to all variants; enabled CI firmware builds and Release publishing; removed pre-built firmware from the repository. |
+| v2.0 | Added DS18B20 temperature control, the mmWave radar firmware, and the v2.0 hardware design. |
+| v1.0 | Added the Web UI, HTTP REST API, and diagnostic entities. |
+
+## 9. Support and License
+
+Community group QR codes are no longer maintained.
+
+<div style="text-align: center;">
+  <table>
+    <tr>
+      <td width="50%" style="padding: 10px;"><img src="./docs/images/donations/wechat.jpg" width="220" alt="WeChat donation"/><p><small>WeChat Pay</small></p></td>
+      <td width="50%" style="padding: 10px;"><img src="./docs/images/donations/alipay.jpg" width="220" alt="Alipay donation"/><p><small>Alipay</small></p></td>
+    </tr>
+  </table>
+</div>
 
 This project is licensed under the [MIT License](./LICENSE).
