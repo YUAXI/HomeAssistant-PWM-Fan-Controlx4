@@ -4,6 +4,17 @@
 
 一个基于 ESPHome 的 4 路 PWM 风扇控制器，支持 Home Assistant、Web 控制面板和 HTTP REST API。每路风扇都可以独立开关、调速和读取转速；v2.0 固件还支持 DS18B20 温度控制及 LD2402G 毫米波雷达扩展。
 
+<div style="text-align: center;">
+  <table>
+    <tr>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/pcb.jpg" width="450" alt="PCB 实物图"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/physical.jpg" width="450" alt="测试图"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha01.png" width="250" alt="Home Assistant 控制界面"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha02.png" width="250" alt="Home Assistant 设备诊断信息"/></td>
+    </tr>
+  </table>
+</div>
+
 ## 1. 固件版本与下载
 
 ### 1.1 先确认硬件版本
@@ -71,6 +82,30 @@ Release 中的版本名称与配置文件对应关系如下：
 
 需要修改 Wi-Fi、实体名称或其他 ESPHome 配置时，可以直接编辑上表中的 `config.yaml`，然后使用 ESPHome 编译和刷写。所有配置文件都使用 ESP32 DevKit、ESP-IDF 框架；v1.0 单核和 v2.0 固件明确启用了单核运行配置。
 
+### 1.6 多台设备与设备命名
+
+所有版本的固件都启用了 `name_add_mac_suffix: true`：
+
+- **同一份固件可以直接刷到任意多台设备**，不需要为每台单独编译打包。
+- 设备启动时会自动把自身 MAC 地址的最后 3 字节追加到名字后面：node name 形如 `esp32pwm22810-a1b2c3`，Home Assistant 中的设备名形如 `ESP32 PWM 22810 a1b2c3`。
+- 实体 ID 同样带该后缀（形如 `fan.esp32_pwm_22810_a1b2c3_feng_shan_1`），同一网络下的多台控制器互不影响。
+- mDNS 主机名（`<node name>.local`）与 OTA 目标地址也一并带上后缀。
+
+> **为什么必须这样做**：Home Assistant 以固件中的 `name` 作为 ESPHome 设备的唯一标识。多台设备使用同一个 `name` 时，HA 会触发[名称冲突解决](https://www.home-assistant.io/integrations/esphome/#reconfiguration-and-device-replacement)：只提供「迁移」和「覆盖」两个选项，后添加的设备会直接覆盖已有设备，两台设备无法同时存在。
+
+如果希望设备名更整齐（例如 `fanctrl-01`），也可以为每台设备单独编译一次，用替换变量命名：
+
+```yaml
+substitutions:
+  device_name: fanctrl-01
+
+esphome:
+  name: ${device_name}
+  name_add_mac_suffix: false
+```
+
+注意：开启后缀后 `name` 最长只能 24 个字符（ESPHome 主机名上限 31 个字符，后缀占 7 个字符），`esp32pwm22810` 远低于该限制。
+
 ## 2. 快速上手
 
 ### 2.1 供电
@@ -85,7 +120,7 @@ Release 中的版本名称与配置文件对应关系如下：
 设备上电后会创建无密码 Wi-Fi 热点 `ESP32-Fan-22810`：
 
 1. 使用手机或电脑连接 `ESP32-Fan-22810`。
-2. 浏览器访问 `http://192.168.4.1` 或 `http://esp32pwm22810.local`。
+2. 浏览器访问 `http://192.168.4.1`（推荐）。mDNS 主机名带 MAC 后缀，形如 `http://esp32pwm22810-xxxxxx.local`。
 3. 在 Wi-Fi 配置向导中选择目标 Wi-Fi 并输入密码。
 4. 设备连接成功后会自动重启。
 
@@ -93,14 +128,14 @@ Release 中的版本名称与配置文件对应关系如下：
 
 ### 2.3 刷写固件
 
-使用 Type-C 连接设备和电脑，选择对应硬件的固件，使用 ESPHome 刷写工具或 `esptool` 完成首次刷写。设备联网后可以使用 `.firmware.ota.bin` 进行远程升级。
+使用 Type-C 连接设备和电脑，选择对应硬件的固件，使用 ESPHome 刷写工具或 `esptool` 完成首次刷写——多台设备都刷同一个 `.bin` 即可。设备联网后可以使用 `.firmware.ota.bin` 远程升级，OTA 目标填写该设备自身的 IP 或主机名。
 
 ### 2.4 接入 Home Assistant
 
 先确保已安装 Home Assistant 的 ESPHome 集成：
 
 1. 打开 **设置 → 设备与服务 → 添加集成**，搜索 **ESPHome**。
-2. 选择自动发现的 `ESP32 PWM 22810`，或手动输入设备 IP 地址。
+2. 选择自动发现的那台设备 `ESP32 PWM 22810 xxxxxx`（`xxxxxx` 为该设备的 MAC 后缀），或手动输入设备 IP 地址。
 3. 输入以下配置文件中的 API 加密密钥并提交：
 
    ```text
@@ -121,6 +156,12 @@ Release 中的版本名称与配置文件对应关系如下：
 
 浏览器访问 `http://设备IP` 即可打开 Web 控制面板，不依赖 Home Assistant。面板可以查看 4 路风扇状态、独立调节风速并查看设备运行信息。
 
+### 2.6 多台设备同时接入
+
+每台设备的名字都带自己的 MAC 后缀，因此可以按同样步骤重复添加任意多台控制器：在 **设置 → 设备与服务** 中选中自动发现的那台 `ESP32 PWM 22810 xxxxxx`，输入同一个 API 加密密钥即可，多台设备会作为独立条目并存。
+
+如果之前已经用重名固件接入过某台设备，请先删除那条旧条目（**设置 → 设备与服务 → ESPHome → 删除**），再重新添加。设备名后缀就是该设备 MAC 地址的最后 3 字节，可与路由器 DHCP 列表或设备页面核对，避免认错设备。
+
 ## 3. v2.0 温度与雷达功能
 
 ### 3.1 DS18B20 接线
@@ -137,7 +178,7 @@ DS18B20 接入 v2.0 板载 **GPIO14** 的 3PIN 排针，使用 1-Wire 总线：
 
 ### 3.2 本地温度调速
 
-本节适用于 `v2.0-ds18b20` 和 `v2.0-ds18b20-radar` 固件。接入设备后，在 Home Assistant 的 **ESP32 PWM 22810** 设备页面中，为每路风扇设置温度源和参数：
+本节适用于 `v2.0-ds18b20` 和 `v2.0-ds18b20-radar` 固件。接入设备后，在 Home Assistant 的 **ESP32 PWM 22810 xxxxxx** 设备页面中，为每路风扇设置温度源和参数：
 
 | 参数 | 作用 | 默认值 |
 |:-----|:-----|:------:|
@@ -300,30 +341,18 @@ v2.0 额外接口：
 - **电源方案**：12V → 5V（`TPS5430DDAR` DC-DC）→ 3.3V（`AMS1117-3.3`）。
 - **USB 转串口**：板载 `CH340C`，通过 Type-C 连接电脑刷写和调试。
 
-## 7. 项目展示
-
-<div style="text-align: center;">
-  <table>
-    <tr>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/pcb.jpg" width="450" alt="PCB 实物图"/></td>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/physical.jpg" width="450" alt="测试图"/></td>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha01.png" width="250" alt="Home Assistant 控制界面"/></td>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha02.png" width="250" alt="Home Assistant 设备诊断信息"/></td>
-    </tr>
-  </table>
-</div>
-
-## 8. 更新记录
+## 7. 更新记录
 
 | 日期 | 更新内容 |
 |:-----|:---------|
+| 2026-10-14 | 固件启用 `name_add_mac_suffix`：同一份固件可刷多台设备，在 HA 中分别接入而不再互相覆盖。 |
 | 2026-08-16 | 自动调速时温度低于或等于 `T-Min` 时断电停转，温度恢复后自动重启风扇。 |
 | 2026-07-10 | DS18B20 读取异常时保持当前风速，移除异常时强制全速保护。 |
 | 2026-07-01 | 全版本增加蓝牙代理；CI 自动编译并发布 Release；移除仓库中的预编译固件。 |
 | v2.0 | 增加 DS18B20 温度控制、毫米波雷达固件和 v2.0 硬件设计。 |
 | v1.0 | 提供 Web 界面、HTTP REST API 和诊断实体。 |
 
-## 9. 支持与许可证
+## 8. 支持与许可证
 
 交流群二维码不再维护。
 

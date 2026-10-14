@@ -1,5 +1,7 @@
 esphome:
   name: esp32pwm22810
+  # 追加本机 MAC 后缀，让同一份固件刷到多台设备时设备名唯一（例：esp32pwm22810-a1b2c3）
+  name_add_mac_suffix: true
   friendly_name: ESP32 PWM 22810
 
 esp32:

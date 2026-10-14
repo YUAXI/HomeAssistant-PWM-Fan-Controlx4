@@ -4,6 +4,17 @@
 
 An ESPHome-based 4-channel PWM fan controller with Home Assistant integration, a Web control panel, and an HTTP REST API. Each fan can be controlled and monitored independently. The v2.0 firmware also supports DS18B20 temperature control and LD2402G mmWave radar expansion.
 
+<div style="text-align: center;">
+  <table>
+    <tr>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/pcb.jpg" width="450" alt="PCB board"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/physical.jpg" width="450" alt="Test setup"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha01.png" width="250" alt="Home Assistant control interface"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha02.png" width="250" alt="Home Assistant device diagnostics"/></td>
+    </tr>
+  </table>
+</div>
+
 ## 1. Firmware Versions and Downloads
 
 ### 1.1 Check the Hardware First
@@ -71,6 +82,30 @@ Release names and their corresponding configuration files:
 
 To change Wi-Fi, entity names, or other ESPHome settings, edit the corresponding `config.yaml` above and compile or flash it with ESPHome. All configurations use the ESP32 DevKit board and the ESP-IDF framework; v1.0 Single-Core and all v2.0 firmware explicitly enable single-core operation.
 
+### 1.6 Multiple Devices and Device Naming
+
+Every firmware variant enables `name_add_mac_suffix: true`:
+
+- **The same firmware binary can be flashed to any number of devices** — no per-device compilation required.
+- At boot, each device appends the last 3 bytes of its own MAC address to its name: the node name looks like `esp32pwm22810-a1b2c3`, and the Home Assistant device name looks like `ESP32 PWM 22810 a1b2c3`.
+- Entity IDs carry the same suffix (for example `fan.esp32_pwm_22810_a1b2c3_feng_shan_1`), so several controllers in one network never collide.
+- The mDNS hostname (`<node name>.local`) and the OTA target address include the suffix as well.
+
+> **Why this is required**: Home Assistant identifies an ESPHome device by the `name` compiled into its firmware. When several devices share one `name`, HA starts [name conflict resolution](https://www.home-assistant.io/integrations/esphome/#reconfiguration-and-device-replacement), which only offers **Migrate** or **Overwrite** — the device added later overwrites the existing one, and the two can never coexist.
+
+To get tidier names (for example `fanctrl-01`), compile one binary per device with a substitution instead:
+
+```yaml
+substitutions:
+  device_name: fanctrl-01
+
+esphome:
+  name: ${device_name}
+  name_add_mac_suffix: false
+```
+
+Note: with the suffix enabled, `name` is limited to 24 characters (the ESPHome hostname limit is 31 characters and the suffix takes 7), which `esp32pwm22810` is well below.
+
 ## 2. Quick Start
 
 ### 2.1 Power Supply
@@ -85,7 +120,7 @@ To change Wi-Fi, entity names, or other ESPHome settings, edit the corresponding
 After startup, the device creates an open Wi-Fi hotspot named `ESP32-Fan-22810`:
 
 1. Connect to `ESP32-Fan-22810` with a phone or computer.
-2. Open `http://192.168.4.1` or `http://esp32pwm22810.local` in a browser.
+2. Open `http://192.168.4.1` (recommended). The mDNS hostname carries the MAC suffix, for example `http://esp32pwm22810-xxxxxx.local`.
 3. Select the target Wi-Fi network and enter its password.
 4. The device connects and reboots automatically.
 
@@ -93,14 +128,14 @@ To skip first-time setup, set `wifi.ssid` and `wifi.password` in the configurati
 
 ### 2.3 Flash the Firmware
 
-Connect the device to a computer with a Type-C cable, select the firmware matching the hardware, and flash it with the ESPHome flashing tool or `esptool`. Once the device is online, use `.firmware.ota.bin` for remote updates.
+Connect the device to a computer with a Type-C cable, select the firmware matching the hardware, and flash it with the ESPHome flashing tool or `esptool` — flash the very same `.bin` to every device. Once the device is online, use `.firmware.ota.bin` for remote updates and point the OTA target at that device's own IP or hostname.
 
 ### 2.4 Add the Device to Home Assistant
 
 Make sure the Home Assistant ESPHome integration is installed:
 
 1. Open **Settings → Devices & Services → Add Integration** and search for **ESPHome**.
-2. Select the discovered device `ESP32 PWM 22810`, or enter its IP address manually.
+2. Select the discovered `ESP32 PWM 22810 xxxxxx` (`xxxxxx` is that device's MAC suffix), or enter its IP address manually.
 3. Enter the API encryption key from the configuration files:
 
    ```text
@@ -121,6 +156,12 @@ The following entities are normally created:
 
 Open `http://device-ip` in a browser to access the Web control panel without Home Assistant. The panel shows all 4 fan states, allows independent speed adjustment, and displays device information.
 
+### 2.6 Adding Several Devices Right Away
+
+Because each device carries its own MAC suffix, you can repeat the same steps for any number of controllers: pick the discovered `ESP32 PWM 22810 xxxxxx` under **Settings → Devices & Services** and enter the same API encryption key — the devices coexist as separate entries.
+
+If a device was added earlier while running the old, identically named firmware, delete that stale entry first (**Settings → Devices & Services → ESPHome → Delete**) and add the device again. The name suffix is the last 3 bytes of that device's MAC address, so compare it with the router's DHCP list or the device page to avoid mixing devices up.
+
 ## 3. v2.0 Temperature and Radar Features
 
 ### 3.1 DS18B20 Wiring
@@ -137,7 +178,7 @@ The board includes a pull-up resistor. Up to 4 DS18B20 sensors can be connected 
 
 ### 3.2 Local Temperature Control
 
-This section applies to `v2.0-ds18b20` and `v2.0-ds18b20-radar`. In the Home Assistant device page for **ESP32 PWM 22810**, configure a temperature source and parameters for each fan:
+This section applies to `v2.0-ds18b20` and `v2.0-ds18b20-radar`. In the Home Assistant device page for **ESP32 PWM 22810 xxxxxx**, configure a temperature source and parameters for each fan:
 
 | Parameter | Description | Default |
 |:----------|:------------|:-------:|
@@ -300,30 +341,18 @@ Additional v2.0 interfaces:
 - **Power scheme**: 12V → 5V (`TPS5430DDAR` DC-DC) → 3.3V (`AMS1117-3.3`).
 - **USB-to-Serial**: Onboard `CH340C` for flashing and debugging over Type-C.
 
-## 7. Project Gallery
-
-<div style="text-align: center;">
-  <table>
-    <tr>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/pcb.jpg" width="450" alt="PCB board"/></td>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/physical.jpg" width="450" alt="Test setup"/></td>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha01.png" width="250" alt="Home Assistant control interface"/></td>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha02.png" width="250" alt="Home Assistant device diagnostics"/></td>
-    </tr>
-  </table>
-</div>
-
-## 8. Changelog
+## 7. Changelog
 
 | Date | Changes |
 |:-----|:--------|
+| 2026-10-14 | Firmware now enables `name_add_mac_suffix`: one binary can be flashed to many devices and each one is added to HA separately instead of overwriting the previous device. |
 | 2026-08-16 | Fans are powered off when automatic control temperature is at or below `T-Min`, and restart when the temperature rises. |
 | 2026-07-10 | On DS18B20 read failure, keep the current fan speed and remove forced full-speed protection. |
 | 2026-07-01 | Added BLE Proxy to all variants; enabled CI firmware builds and Release publishing; removed pre-built firmware from the repository. |
 | v2.0 | Added DS18B20 temperature control, the mmWave radar firmware, and the v2.0 hardware design. |
 | v1.0 | Added the Web UI, HTTP REST API, and diagnostic entities. |
 
-## 9. Support and License
+## 8. Support and License
 
 Community group QR codes are no longer maintained.
 

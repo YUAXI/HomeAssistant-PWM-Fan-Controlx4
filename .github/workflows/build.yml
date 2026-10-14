@@ -101,6 +101,8 @@ jobs:
             - `.firmware.bin` — 标准固件
             - `.firmware.factory.bin` — 工厂固件
             - `.firmware.ota.bin` — OTA 升级固件
+
+            **多台设备：** 同一份固件可直接刷到多台设备，设备名会自动追加本机 MAC 后缀（如 `esp32pwm22810-a1b2c3`），在 Home Assistant 中可分别添加，不会互相覆盖。
           files: artifacts/*
           draft: false
           prerelease: false
