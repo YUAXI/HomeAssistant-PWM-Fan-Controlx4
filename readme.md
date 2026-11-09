@@ -15,6 +15,28 @@
   </table>
 </div>
 
+## 文档与 Wiki
+
+除本 README 外，项目还提供一套完整的中英双语 Wiki：
+
+| 主题 | 中文 | English |
+|:-----|:-----|:--------|
+| 首页 / 导航 | [中文首页](./docs/wiki/zh/Home.md) | [Wiki home](./docs/wiki/en/Home-EN.md) |
+| 快速上手 | [快速上手](./docs/wiki/zh/Getting-Started.md) | [Getting started](./docs/wiki/en/Getting-Started-EN.md) |
+| 固件版本与编译 | [固件版本](./docs/wiki/zh/Firmware.md) | [Firmware](./docs/wiki/en/Firmware-EN.md) |
+| 实体清单与参数 | [实体参考](./docs/wiki/zh/Entities.md) | [Entities](./docs/wiki/en/Entities-EN.md) |
+| 温度控制 | [温度控制](./docs/wiki/zh/Temperature-Control.md) | [Temperature control](./docs/wiki/en/Temperature-Control-EN.md) |
+| 毫米波雷达 | [毫米波雷达](./docs/wiki/zh/Radar.md) | [mmWave radar](./docs/wiki/en/Radar-EN.md) |
+| HTTP API | [HTTP API](./docs/wiki/zh/HTTP-API.md) | [HTTP API](./docs/wiki/en/HTTP-API-EN.md) |
+| HA 集成与自动化 | [Home Assistant](./docs/wiki/zh/Home-Assistant.md) | [Home Assistant](./docs/wiki/en/Home-Assistant-EN.md) |
+| 硬件资料 | [硬件资料](./docs/wiki/zh/Hardware.md) | [Hardware](./docs/wiki/en/Hardware-EN.md) |
+| 故障排查 | [故障排查](./docs/wiki/zh/Troubleshooting.md) | [Troubleshooting](./docs/wiki/en/Troubleshooting-EN.md) |
+| 常见问题 | [常见问题](./docs/wiki/zh/FAQ.md) | [FAQ](./docs/wiki/en/FAQ-EN.md) |
+| 开发指南 | [开发指南](./docs/wiki/zh/Development.md) | [Development](./docs/wiki/en/Development-EN.md) |
+| 更新记录 | [更新记录](./docs/wiki/zh/Changelog.md) | [Changelog](./docs/wiki/en/Changelog-EN.md) |
+
+> Wiki 源文件位于 [`docs/wiki/`](./docs/wiki/)，可一键发布为 GitHub Wiki，发布与维护方法见 [docs/wiki/README.md](./docs/wiki/README.md)。
+
 ## 1. 固件版本与下载
 
 ### 1.1 先确认硬件版本
@@ -345,6 +367,7 @@ v2.0 额外接口：
 
 | 日期 | 更新内容 |
 |:-----|:---------|
+| 2026-11-09 | 新增中英双语 Wiki 文档（`docs/wiki/`）：快速上手、固件版本、实体参考、温度控制、毫米波雷达、HTTP API、HA 自动化、硬件资料、故障排查、FAQ、开发指南与更新记录。 |
 | 2026-10-14 | 固件启用 `name_add_mac_suffix`：同一份固件可刷多台设备，在 HA 中分别接入而不再互相覆盖。 |
 | 2026-08-16 | 自动调速时温度低于或等于 `T-Min` 时断电停转，温度恢复后自动重启风扇。 |
 | 2026-07-10 | DS18B20 读取异常时保持当前风速，移除异常时强制全速保护。 |

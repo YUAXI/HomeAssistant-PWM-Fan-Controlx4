@@ -15,6 +15,28 @@ An ESPHome-based 4-channel PWM fan controller with Home Assistant integration, a
   </table>
 </div>
 
+## Documentation / Wiki
+
+Beyond this README, the project ships a complete bilingual wiki:
+
+| Topic | English | 中文 |
+|:------|:--------|:-----|
+| Home / navigation | [Wiki home](./docs/wiki/en/Home-EN.md) | [中文首页](./docs/wiki/zh/Home.md) |
+| Quick start | [Getting started](./docs/wiki/en/Getting-Started-EN.md) | [快速上手](./docs/wiki/zh/Getting-Started.md) |
+| Firmware and builds | [Firmware](./docs/wiki/en/Firmware-EN.md) | [固件版本](./docs/wiki/zh/Firmware.md) |
+| Entities and parameters | [Entities](./docs/wiki/en/Entities-EN.md) | [实体参考](./docs/wiki/zh/Entities.md) |
+| Temperature control | [Temperature control](./docs/wiki/en/Temperature-Control-EN.md) | [温度控制](./docs/wiki/zh/Temperature-Control.md) |
+| mmWave radar | [mmWave radar](./docs/wiki/en/Radar-EN.md) | [毫米波雷达](./docs/wiki/zh/Radar.md) |
+| HTTP API | [HTTP API](./docs/wiki/en/HTTP-API-EN.md) | [HTTP API](./docs/wiki/zh/HTTP-API.md) |
+| HA integration and automations | [Home Assistant](./docs/wiki/en/Home-Assistant-EN.md) | [Home Assistant](./docs/wiki/zh/Home-Assistant.md) |
+| Hardware | [Hardware](./docs/wiki/en/Hardware-EN.md) | [硬件资料](./docs/wiki/zh/Hardware.md) |
+| Troubleshooting | [Troubleshooting](./docs/wiki/en/Troubleshooting-EN.md) | [故障排查](./docs/wiki/zh/Troubleshooting.md) |
+| FAQ | [FAQ](./docs/wiki/en/FAQ-EN.md) | [常见问题](./docs/wiki/zh/FAQ.md) |
+| Development | [Development](./docs/wiki/en/Development-EN.md) | [开发指南](./docs/wiki/zh/Development.md) |
+| Changelog | [Changelog](./docs/wiki/en/Changelog-EN.md) | [更新记录](./docs/wiki/zh/Changelog.md) |
+
+> The wiki sources live in [`docs/wiki/`](./docs/wiki/) and can be published to the GitHub Wiki in one command — see [docs/wiki/README.md](./docs/wiki/README.md) for the publishing workflow and conventions.
+
 ## 1. Firmware Versions and Downloads
 
 ### 1.1 Check the Hardware First
@@ -345,6 +367,7 @@ Additional v2.0 interfaces:
 
 | Date | Changes |
 |:-----|:--------|
+| 2026-11-09 | Added a bilingual wiki (`docs/wiki/`): quick start, firmware, entity reference, temperature control, mmWave radar, HTTP API, HA automations, hardware, troubleshooting, FAQ, development guide, and changelog. |
 | 2026-10-14 | Firmware now enables `name_add_mac_suffix`: one binary can be flashed to many devices and each one is added to HA separately instead of overwriting the previous device. |
 | 2026-08-16 | Fans are powered off when automatic control temperature is at or below `T-Min`, and restart when the temperature rises. |
 | 2026-07-10 | On DS18B20 read failure, keep the current fan speed and remove forced full-speed protection. |

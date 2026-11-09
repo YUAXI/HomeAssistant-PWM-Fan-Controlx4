@@ -1,0 +1,8 @@
+# Normalise line endings for documentation and scripts.
+# The wiki sources are published as-is to the GitHub Wiki, so keep them LF in the
+# repository. The shell publisher must stay LF so it also runs under WSL/Git Bash.
+*.md      text eol=lf
+*.sh      text eol=lf
+*.py      text eol=lf
+*.yaml    text eol=lf
+*.ps1     text eol=crlf
