@@ -51,12 +51,15 @@
 
 | 你的硬件 | 建议固件 |
 |:---------|:---------|
-| 不确定单核/双核 | **任意 v2.0 固件**或 **v1.0 单核**（单核固件在双核芯片上同样能运行） |
-| 确认是双核 | v1.0 双核，或 v2.0 |
+| 2026-11-12 之后购买的成品（双核） | **任意当前 v2.0 版本**（Basic / DS18B20 / DS18B20+雷达） |
+| 更早购买的单核老设备 | 归档单核构建（`firmware/*/archive/v2.0/single-core/...`），需自行编译，见 [固件版本](Firmware#归档的构建) |
+| v1.0 板卡（任意变体） | 归档的 v1.0 构建（`firmware/*/archive/v1.0/...`），需自行编译，见 [固件版本](Firmware#归档的构建) |
 | 需要本地温控 | v2.0 DS18B20 |
 | 需要人体存在检测 | v2.0 DS18B20 + 雷达 |
 
-详细对比见 [固件版本](Firmware)。
+当前 v2.0 固件都是**双核构建**：2026-11-12 之后售卖的成品全部为双核板。整个 v1.0 系列与单核构建已归档；单核板无法启动双核固件，只能用归档单核构建；双核板反过来也能运行归档单核固件，只是闲置一个核心。拿不准板子新旧时，先在串口日志里确认启动是否正常，或按购买时间判断。
+
+详细对比见 [固件版本](Firmware)。每个版本都有两种语言的构建：**英文版（`-en`，主推）**实体名为 `Fan 1`、`Temp A`、`Uptime`…，**中文版（`-zh`）**实体名为 `风扇 1`、`温度 A`、`设备运行时间`…。两者功能、引脚、节点名完全相同，只按你在 Home Assistant 里想看到的语言选一个刷入即可。
 
 ### 方式 A：ESPHome Web（最简单，无需装工具链）
 
@@ -72,12 +75,14 @@
 pip install esptool
 
 # 首次刷写：factory 固件写到 0x0
+# 中文版文件名带 -zh；英文版把 -zh 换成 -en（主推）
+# 注意：v2.0-basic-zh 现在是双核构建，只适用于双核板
 esptool.py --chip esp32 --port COM5 --baud 460800 \
-  write_flash 0x0 v2.0-basic.firmware.factory.bin
+  write_flash 0x0 v2.0-basic-zh.firmware.factory.bin
 
 # 若只拿到普通 app 固件（.firmware.bin），偏移为 0x10000
 esptool.py --chip esp32 --port COM5 --baud 460800 \
-  write_flash 0x10000 v2.0-basic.firmware.bin
+  write_flash 0x10000 v2.0-basic-zh.firmware.bin
 
 # 进不了下载模式时：按住 BOOT（IO0）再按一下 RST，然后松开 BOOT
 ```
@@ -88,15 +93,21 @@ Linux / macOS 把 `COM5` 换成 `/dev/ttyUSB0`、`/dev/cu.usbserial-*`；下载�
 
 ```bash
 pip install esphome
-esphome compile firmware/v2.0/single-core/ds18b20/config.yaml
-esphome upload  firmware/v2.0/single-core/ds18b20/config.yaml   # 按提示选串口
+
+# 中文版（实体名 风扇 1 / 温度 A …）
+esphome compile firmware/zh/v2.0/dual-core/ds18b20/config.yaml
+esphome upload  firmware/zh/v2.0/dual-core/ds18b20/config.yaml   # 按提示选串口
+
+# 英文版（主推，实体名 Fan 1 / Temp A …）
+esphome compile firmware/en/v2.0/dual-core/ds18b20/config.yaml
+esphome upload  firmware/en/v2.0/dual-core/ds18b20/config.yaml
 ```
 
 ### 方式 D：OTA 升级已联网设备
 
 ```bash
-# 方式 1：用 ESPHome CLI 指定设备地址
-esphome upload firmware/v2.0/single-core/ds18b20/config.yaml --device 192.168.1.50
+# 方式 1：用 ESPHome CLI 指定设备地址（中文版；英文版换 firmware/en/...）
+esphome upload firmware/zh/v2.0/dual-core/ds18b20/config.yaml --device 192.168.1.50
 
 # 方式 2：在 ESPHome Dashboard 里点 INSTALL → Wirelessly
 # 方式 3：HA 中 ESPHome 集成设备页 → 三个点 → 更新（有可用更新时）
@@ -104,7 +115,7 @@ esphome upload firmware/v2.0/single-core/ds18b20/config.yaml --device 192.168.1.
 
 OTA 目标填该设备自己的 IP 或 `<节点名>.local`；OTA 密码为 `4283bb50a8cd66774ce91d2c9d412cf2`。
 
-> ⚠️ OTA 过程中断电会损坏应用分区，需回到 USB 刷写。升级前请确认固件与硬件版本一致。
+> ⚠️ OTA 过程中断电会损坏应用分区，需回到 USB 刷写。升级前请确认固件与硬件版本一致：当前成品都是双核，刷双核构建；更早的单核老设备请用归档单核构建，双核固件在单核板上无法启动。
 
 ## 2.4 接入 Home Assistant
 

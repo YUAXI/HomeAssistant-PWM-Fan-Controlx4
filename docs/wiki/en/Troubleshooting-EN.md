@@ -6,15 +6,15 @@
 
 1. **Check the serial log**: connect Type-C to a computer, open the port with `esphome logs <config>` or any serial tool (115200). If you see boot logs, the hardware is alive.
 2. **Check the web panel**: `http://<device IP>/`. If it loads, Wi-Fi and firmware are fine.
-3. **Check the HA entities**: is 设备运行时间 (uptime) on the device page increasing? (Back to zero = the device rebooted.)
-4. **Confirm the firmware variant**: flashing single-core/dual-core firmware to the wrong board is the most common cause of "won't boot".
+3. **Check the HA entities**: is `Uptime` on the device page increasing? (Back to zero = the device rebooted.)
+4. **Confirm the firmware variant**: current releases are dual-core; flashing them on a pre-2026-11-12 **single-core** board is the most common cause of "won't boot" (use an archived single-core build instead).
 
 ## Device does not boot / hotspot not found
 
 | Check | Details and fix |
 |:-----|:-----------|
 | Power | DC 12V is required; Type-C 5V is only for flashing and debugging, cannot drive fans, and some boards cannot even boot reliably on 5V alone |
-| Wrong firmware | `v1.0 双核` firmware on a single-core device **will not boot**. Reflash `v1.0 单核` or any `v2.0` build over USB |
+| Wrong firmware | Dual-core firmware on a **single-core board** (shipped before 2026-11-12) **will not boot**: flash the matching archived single-core build — `firmware/en/archive/v1.0/single-core/config.yaml` or `firmware/en/archive/v2.0/single-core/{basic,ds18b20,ds18b20-radar}/config.yaml` — compiled locally and written over USB. A dual-core board accepts both kinds, so the reverse mistake only wastes a core |
 | Corrupt partition table | Flashing only `.firmware.bin` (the app image) to `0x0` produces an unbootable image → flash `.factory.bin` to `0x0` |
 | Button stuck | Holding BOOT (IO0) enters download mode; release it and power-cycle |
 | Module power | Feel whether the ESP32 module gets unusually hot; measure the 3.3V rail (3.2–3.4V) |
@@ -34,13 +34,19 @@ Standard recovery procedure:
 
 ```bash
 # 1. enter download mode: hold BOOT, tap RST, release BOOT
-# 2. flash the factory image to the whole chip
+# 2. flash the factory image of an ACTIVE dual-core build for the whole chip
 esptool.py --chip esp32 --port COM5 --baud 115200 write_flash 0x0 \
-  v1.0-single-core.firmware.factory.bin
+  v2.0-basic-en.firmware.factory.bin
 
-# 3. if that still fails, erase the whole flash first
+# 3. on an older single-core board use your locally compiled archive build instead:
+#    esphome compile firmware/en/archive/v2.0/single-core/basic/config.yaml
+#    then write the resulting .esphome/build/esp32pwm22810/firmware.factory.bin at 0x0
+
+# 4. if that still fails, erase the whole flash first
 esptool.py --chip esp32 --port COM5 erase_flash
 ```
+
+> There is no single-core download any more: single-core builds are archived and not published on Releases, so an older board can only be rescued with a binary you build yourself (see [Archived single-core builds](Firmware-EN#archived-builds)).
 
 ## Provisioning fails / cannot join Wi-Fi
 
@@ -107,7 +113,7 @@ Check in this order:
 
 | Check | Explanation |
 |:-----|:-----|
-| Is `FN-Src` set to `未绑定` (unbound) | A–D is bound by default, but if you have set "unbound" manually, no temperature control runs |
+| Is `FN-Src` set to `Unbound` | A–D is bound by default, but if you have set `Unbound` manually, no temperature control runs |
 | Is the temperature `unknown` | Probe not connected / no pull-up / index shifted → the algorithm keeps the current state |
 | `T-Min` ≥ `T-Max` | The firmware does not validate this; the "≤ T-Min → stop" branch matches first, so the fan never spins |
 | `F-Min = 0` | Just above the threshold the computed value is 0% → treated as off |
@@ -121,7 +127,7 @@ Check in this order:
 | All temperatures `unknown` | Check that GPIO14 is wired correctly, that there is a 4.7kΩ pull-up, and that the probe is powered from 3.3V/5V |
 | Some `unknown` | One probe has a bad connection; indices shift, so switch to a fixed `address` |
 | Readings clearly off | Voltage drop/interference on long cables; use shielded cable and shorten the bus |
-| `温度 A`–`温度 D` do not match the physical positions | Index ordering issue, see [temperature control](Temperature-Control-EN#indexes-and-temperature-ad) |
+| `Temp A`–`Temp D` do not match the physical positions | Index ordering issue, see [temperature control](Temperature-Control-EN#indexes-and-temperature-ad) |
 | Updates are very slow | Fixed at 5 seconds; the 4 probes share one bus, so this is normal |
 
 ## Radar problems
@@ -139,7 +145,7 @@ Check in this order:
 | Symptom | Cause |
 |:-----|:-----|
 | Home page does not open | IP changed (check the router), port 80 taken (impossible — it is the device itself), firewall between subnets |
-| API returns 404 | Entity name misspelled, or not URL-encoded. The name must match the YAML `name` **exactly** (including spaces) |
+| API returns 404 | Entity name misspelled, or a space was not written as `%20`. The name must match the YAML `name` **exactly** (including spaces and case) |
 | API returns 400/405 | Wrong action name (it should be `turn_on`/`turn_off`/`toggle`/`set`/`press`), or a GET was used to write to that endpoint |
 | Returns `401` | `web_server.auth` is enabled in the configuration and the script sends no credentials |
 | Occasional timeouts | Too many connections / device memory pressure; reduce concurrency and polling frequency |
@@ -151,7 +157,7 @@ Check in this order:
 | Authentication failure | Wrong OTA password: `4283bb50a8cd66774ce91d2c9d412cf2` |
 | Device not found | Use the IP instead of the hostname; make sure both are on the same subnet; test with `ping` |
 | Transfer drops midway | Weak Wi-Fi signal or unstable power; move closer to the AP or flash over USB |
-| Device unreachable after upgrade | Firmware does not match the hardware (single-core/dual-core); recover over USB |
+| Device unreachable after upgrade | Firmware does not match the hardware: a current (dual-core) release on an older single-core board will not boot — compile and flash the archived single-core build over USB |
 | All parameters lost after upgrade | A full-chip factory flash erased NVS; set the temperature parameters again |
 
 ## Device reboots frequently
@@ -178,8 +184,8 @@ Check in this order:
 Collect the following information before asking — it makes diagnosis much faster:
 
 ```text
-1. Firmware version (the 「ESPHome 版本」 entity in HA / the release name)
-2. Hardware revision (v1.0 / v2.0, single-core / dual-core)
+1. Firmware version (the "ESPHome Version" entity in HA / the release name)
+2. Hardware revision (v1.0 / v2.0, and whether the board is single-core — shipped before 2026-11-12 — or dual-core)
 3. Serial boot log (first 40 lines + the error section)
 4. Screenshots of the relevant entity states in HA
 5. Reproduction steps (what you did → what you expected → what actually happened)

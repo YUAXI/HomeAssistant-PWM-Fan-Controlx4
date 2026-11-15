@@ -23,22 +23,22 @@
 | Page | Contents |
 |:-----|:-----|
 | [Quick start](Getting-Started-EN) | Unboxing check, power, first-time Wi-Fi setup, firmware flashing, Home Assistant onboarding |
-| [Firmware versions](Firmware-EN) | Differences between the 5 firmwares, how to choose, release artifacts, custom builds, multi-device naming |
+| [Firmware versions](Firmware-EN) | The 4 active (dual-core) firmwares plus the archived single-core builds, how to choose, release artifacts, custom builds, multi-device naming |
 | [Entity reference](Entities-EN) | Complete entity list (fan / RPM / temperature / parameters / diagnostics) with defaults and ranges |
 | [Temperature control](Temperature-Control-EN) | DS18B20 wiring, 1-Wire index, linear speed algorithm, parameter tuning, abnormal behaviour |
 | [mmWave radar](Radar-EN) | LD2402G wiring and serial protocol, anti-interference algorithm, distance-threshold tuning, automation examples |
-| [HTTP API](HTTP-API-EN) | Complete REST endpoint set, Chinese entity-name encoding, curl / Python / PowerShell examples, SSE event stream |
+| [HTTP API](HTTP-API-EN) | Complete REST endpoint set, ASCII entity names with `%20` for spaces, curl / Python / PowerShell examples, SSE event stream |
 | [Home Assistant](Home-Assistant-EN) | Adding the integration, entity polish, dashboard cards, automation templates (temperature control / silent mode / alerts) |
 | [Hardware](Hardware-EN) | Full GPIO table, power tree, key components, connector silkscreen, mechanical parts and assembly notes |
 | [Troubleshooting](Troubleshooting-EN) | Symptom-based diagnosis: won't boot, won't come online, fan not spinning, RPM reads 0, radar false alarms, OTA failure |
-| [FAQ](FAQ-EN) | How large a fan it can drive, whether it can be modified for 24V, whether it works without HA, commercial licensing |
+| [FAQ](FAQ-EN) | Which firmware to flash (single-core vs dual-core), how large a fan it can drive, whether it can be modified for 24V, whether it works without HA, commercial licensing |
 | [Development](Development-EN) | Repository layout, changing pins / adding channels, local builds, CI and release flow, how to contribute |
 | [Changelog](Changelog-EN) | Firmware and hardware version history, behaviour changes and upgrade notes |
 
 ## One-minute quick start
 
 ```text
-1. Confirm the hardware revision (single-core / dual-core) → download the matching release firmware
+1. Download the release firmware — every controller sold after 2026-11-12 is dual-core, so pick a v2.0 variant (the -en build is recommended; -zh only if you need the Chinese entity names). Only the archived v1.0 line or a pre-2026-11-12 single-core board needs an archived build, compiled locally
 2. Connect Type-C to your computer and flash the .factory.bin with ESPHome Web or esptool
 3. Join the ESP32-Fan-22810 hotspot from your phone → open http://192.168.4.1 to configure Wi-Fi
 4. Open http://<device IP> in a browser to control it; in HA add the ESPHome integration and enter the API encryption key
@@ -52,15 +52,15 @@ LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk=
 
 ## Version cheat sheet
 
-| Firmware | Processor | Temperature | Radar | Config file |
+| Firmware | Processor | Temperature | Radar | Config file (English) |
 |:-----|:------:|:----:|:----:|:---------|
-| v1.0 dual-core | Dual-core | - | - | `firmware/v1.0/dual-core/config.yaml` |
-| v1.0 single-core | Single-core | - | - | `firmware/v1.0/single-core/config.yaml` |
-| v2.0 Basic | Single-core | - | - | `firmware/v2.0/single-core/basic/config.yaml` |
-| v2.0 DS18B20 | Single-core | ✅ | - | `firmware/v2.0/single-core/ds18b20/config.yaml` |
-| v2.0 DS18B20 + radar | Single-core | ✅ | ✅ | `firmware/v2.0/single-core/ds18b20-radar/config.yaml` |
+| v2.0 Basic | Dual-core | - | - | `firmware/en/v2.0/dual-core/basic/config.yaml` |
+| v2.0 DS18B20 | Dual-core | ✅ | - | `firmware/en/v2.0/dual-core/ds18b20/config.yaml` |
+| v2.0 DS18B20 + radar | Dual-core | ✅ | ✅ | `firmware/en/v2.0/dual-core/ds18b20-radar/config.yaml` |
 
-> ⚠️ **Retail devices are usually single-core designs and can only run `v1.0 single-core` or any `v2.0` firmware. Flashing `v1.0 dual-core` firmware will leave the device unable to boot.**
+Every version is built in two languages: `-en` (English entity names, **primary / recommended**) and `-zh` (keeps the original Chinese entity names). The Chinese configs live under `firmware/zh/` with the same subdirectories. See [Firmware versions](Firmware-EN#languages).
+
+> **Since 2026-11-12 every controller sold is dual-core**, so all three rows above are active dual-core builds. The **entire v1.0 line** and the older single-core design are archived under `firmware/en/archive/` (`v1.0/{dual-core,single-core}`, `v2.0/single-core/{basic,ds18b20,ds18b20-radar}`); they are no longer in Releases and must be compiled locally — see [Archived builds](Firmware-EN#archived-builds). v1.0 boards cannot boot the v2.0 firmware line in general, so use the archived v1.0 build on those.
 
 ## Key parameters
 
@@ -77,7 +77,7 @@ LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk=
 ## Related links
 
 - [GitHub Releases (pre-built firmware)](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/releases)
-- [Chinese README](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/readme.md) · [English README](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/README_EN.md)
+- [English README](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/readme.md) · [Chinese README](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/README_ZH.md)
 - [ESPHome documentation](https://esphome.io/)
 - [Home Assistant ESPHome integration](https://www.home-assistant.io/integrations/esphome/)
 

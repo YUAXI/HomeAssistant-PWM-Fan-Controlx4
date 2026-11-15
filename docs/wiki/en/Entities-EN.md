@@ -4,27 +4,29 @@
 
 Every `name` in the firmware becomes an entity in HA and also appears in the web panel and the REST API. This page is the complete entity list with defaults.
 
+> The entity names below are those of the **English firmware** (`firmware/en/`, the primary build). The Chinese edition (`firmware/zh/`) exposes the same entities under the original Chinese names.
+
 ## Naming rules
 
 | Level | Example |
 |:-----|:-----|
-| `name` in the config file | `风扇 1` |
-| Entity name in the web UI / REST API | `风扇 1` (identical to the YAML, spaces and Chinese included) |
+| `name` in the config file | `Fan 1` |
+| Entity name in the web UI / REST API | `Fan 1` (identical to the YAML, spaces included) |
 | HA device name | `ESP32 PWM 22810 a1b2c3` |
-| HA `entity_id` | `fan.esp32_pwm_22810_a1b2c3_风扇_1` |
+| HA `entity_id` | `fan.esp32_pwm_22810_a1b2c3_fan_1` |
 
-- HA's `entity_id` is the device name plus the entity name, slugified; Chinese characters are preserved.
+- HA's `entity_id` is the device name plus the entity name, slugified; ASCII names become clean short slugs.
 - The actual `entity_id` differs between firmwares and device names, so **go by what the HA entity page shows**; you can rename `entity_id` in HA without affecting the firmware.
-- To avoid Chinese IDs entirely, change `name` to ASCII in the config (see [Firmware versions](Firmware-EN#custom-compilation)).
+- The English firmware already uses ASCII names, so `entity_id`s stay short and readable; the Chinese edition (`firmware/zh/`) keeps Chinese names, so its IDs contain Chinese characters and its API paths need full percent-encoding (see [Firmware versions](Firmware-EN#languages)).
 
 ## Fans (fan)
 
 | Entity name | Firmware id | Description |
 |:-------|:----------|:-----|
-| 风扇 1 | `my_fan1` | PWM = GPIO16, power = GPIO21 |
-| 风扇 2 | `my_fan2` | PWM = GPIO17, power = GPIO22 |
-| 风扇 3 | `my_fan3` | PWM = GPIO18, power = GPIO23 |
-| 风扇 4 | `my_fan4` | PWM = GPIO19, power = GPIO13 |
+| Fan 1 | `my_fan1` | PWM = GPIO16, power = GPIO21 |
+| Fan 2 | `my_fan2` | PWM = GPIO17, power = GPIO22 |
+| Fan 3 | `my_fan3` | PWM = GPIO18, power = GPIO23 |
+| Fan 4 | `my_fan4` | PWM = GPIO19, power = GPIO13 |
 
 | Property | Value |
 |:-----|:---|
@@ -41,17 +43,17 @@ Every `name` in the firmware becomes an entity in HA and also appears in the web
 
 | Entity name | Unit | Refresh | Firmware | Description |
 |:-------|:-----|:-----|:---------|:-----|
-| 风扇 1 转速 | RPM | 4s | All | `pulse_counter`, falling-edge counting |
-| 风扇 2 转速 | RPM | 4s | All | same as above |
-| 风扇 3 转速 | RPM | 4s | All | same as above |
-| 风扇 4 转速 | RPM | 4s | All | same as above |
-| 温度 A | °C | 5s | DS18B20 / radar | 1-Wire index 0 |
-| 温度 B | °C | 5s | DS18B20 / radar | 1-Wire index 1 |
-| 温度 C | °C | 5s | DS18B20 / radar | 1-Wire index 2 |
-| 温度 D | °C | 5s | DS18B20 / radar | 1-Wire index 3 |
-| 雷达目标距离 Dist | m | event-driven | Radar | publishes `NaN` when nobody is present / out of range (HA shows unknown) |
-| 设备运行时间 | s | 60s | All | diagnostic entity |
-| Wi-Fi 信号强度 | dBm | 60s | All | diagnostic entity |
+| Fan 1 RPM | RPM | 4s | All | `pulse_counter`, falling-edge counting |
+| Fan 2 RPM | RPM | 4s | All | same as above |
+| Fan 3 RPM | RPM | 4s | All | same as above |
+| Fan 4 RPM | RPM | 4s | All | same as above |
+| Temp A | °C | 5s | DS18B20 / radar | 1-Wire index 0 |
+| Temp B | °C | 5s | DS18B20 / radar | 1-Wire index 1 |
+| Temp C | °C | 5s | DS18B20 / radar | 1-Wire index 2 |
+| Temp D | °C | 5s | DS18B20 / radar | 1-Wire index 3 |
+| Radar Distance | m | event-driven | Radar | publishes `NaN` when nobody is present / out of range (HA shows unknown) |
+| Uptime | s | 60s | All | diagnostic entity |
+| Wi-Fi Signal | dBm | 60s | All | diagnostic entity |
 
 RPM conversion: each fan revolution produces **2** tach pulses, and the firmware uses `multiply: 0.5` to convert "pulses per minute" into RPM. If a fan actually outputs 1 pulse per revolution, the reading comes out half as high; change `multiply` in the config.
 
@@ -59,15 +61,15 @@ RPM conversion: each fan revolution produces **2** tach pulses, and the firmware
 
 | Entity name | Firmware | Description |
 |:-------|:---------|:-----|
-| 设备 IP 地址 | All | diagnostic entity, updated when DHCP changes the IP |
-| 连接 Wi-Fi SSID | All | diagnostic entity |
-| ESPHome 版本 | All | diagnostic entity, reflects the ESPHome version used at build time |
+| IP Address | All | diagnostic entity, updated when DHCP changes the IP |
+| Wi-Fi SSID | All | diagnostic entity |
+| ESPHome Version | All | diagnostic entity, reflects the ESPHome version used at build time |
 
 ## Binary sensors (binary_sensor)
 
 | Entity name | Firmware | Description |
 |:-------|:---------|:-----|
-| 雷达检测到目标 Target | Radar | someone present = `on`. Decision logic in [mmWave radar](Radar-EN#anti-interference-algorithm) |
+| Radar Target Detected | Radar | someone present = `on`. Decision logic in [mmWave radar](Radar-EN#anti-interference-algorithm) |
 
 ## Numbers (number)
 
@@ -75,10 +77,10 @@ RPM conversion: each fan revolution produces **2** tach pulses, and the firmware
 
 | Entity name format | id | Range | Step | Default | Unit |
 |:-----------|:---|:-----|:-----|:-----|:-----|
-| 风扇N 启控温度 T-Min | `fN_t_min` | 10–60 | 1 | 30 | °C |
-| 风扇N 满载温度 T-Max | `fN_t_max` | 40–90 | 1 | 50 | °C |
-| 风扇N 最低风速 F-Min | `fN_f_min` | 0–50 | 1 | 0 | % |
-| 风扇N 最高风速 F-Max | `fN_f_max` | 50–100 | 1 | 100 | % |
+| Fan N Start Temp T-Min | `fN_t_min` | 10–60 | 1 | 30 | °C |
+| Fan N Full Speed Temp T-Max | `fN_t_max` | 40–90 | 1 | 50 | °C |
+| Fan N Min Speed F-Min | `fN_f_min` | 0–50 | 1 | 0 | % |
+| Fan N Max Speed F-Max | `fN_f_max` | 50–100 | 1 | 100 | % |
 
 `N` is 1–4. All of them use `restore_value: true` and survive power loss.
 
@@ -86,17 +88,17 @@ RPM conversion: each fan revolution produces **2** tach pulses, and the firmware
 
 | Entity name | id | Range | Step | Default | Unit |
 |:-------|:---|:-----|:-----|:-----|:-----|
-| 雷达 最近过滤门限 Min | `radar_min_dist` | 0.0–2.0 | 0.05 | 0.10 | m |
-| 雷达 最远过滤门限 Max | `radar_max_dist` | 0.5–8.0 | 0.1 | 1.5 | m |
+| Radar Min Distance | `radar_min_dist` | 0.0–2.0 | 0.05 | 0.10 | m |
+| Radar Max Distance | `radar_max_dist` | 0.5–8.0 | 0.1 | 1.5 | m |
 
 ## Selectors (select)
 
 | Entity name | id | Options | Default |
 |:-------|:---|:-------|:-----|
-| 风扇1 温度源绑定 F1-Src | `f1_source` | 未绑定 / 温度 A / 温度 B / 温度 C / 温度 D | 温度 A |
-| 风扇2 温度源绑定 F2-Src | `f2_source` | same as above | 温度 B |
-| 风扇3 温度源绑定 F3-Src | `f3_source` | same as above | 温度 C |
-| 风扇4 温度源绑定 F4-Src | `f4_source` | same as above | 温度 D |
+| Fan 1 Temp Source F1-Src | `f1_source` | Unbound / Temp A / Temp B / Temp C / Temp D | Temp A |
+| Fan 2 Temp Source F2-Src | `f2_source` | same as above | Temp B |
+| Fan 3 Temp Source F3-Src | `f3_source` | same as above | Temp C |
+| Fan 4 Temp Source F4-Src | `f4_source` | same as above | Temp D |
 
 `restore_value: true`, so the selected temperature source survives power loss.
 
@@ -130,4 +132,4 @@ RPM conversion: each fan revolution produces **2** tach pulses, and the firmware
 1. **Diagnostic entities** are collapsed into the device's "Diagnostics" section in HA, not on the main control card;
 2. Entities marked `internal: true` are never exposed (only the 4 power switches);
 3. Temperature / radar / parameter entities only exist in the matching firmware; Basic and v1.0 do not have them;
-4. When entity names are duplicated HA appends a `_2` suffix; search the entity list for 风扇 to confirm.
+4. When entity names are duplicated HA appends a `_2` suffix; search the entity list for `Fan` to confirm.

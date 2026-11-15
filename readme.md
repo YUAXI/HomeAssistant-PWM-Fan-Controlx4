@@ -1,121 +1,147 @@
 # HomeAssistant-PWM-Fan-Controlx4
 
-<p align="center"><a href="readme.md">中文</a> · <a href="README_EN.md">English</a></p>
+<p align="center"><a href="readme.md">English</a> · <a href="README_ZH.md">中文</a></p>
 
-一个基于 ESPHome 的 4 路 PWM 风扇控制器，支持 Home Assistant、Web 控制面板和 HTTP REST API。每路风扇都可以独立开关、调速和读取转速；v2.0 固件还支持 DS18B20 温度控制及 LD2402G 毫米波雷达扩展。
+<p align="center">
+  <a href="https://www.tindie.com/products/esphome-fan-controllers/esp32-4-channel-pwm-fan-controller-homeassistant/">
+    <strong>🛒 Buy the assembled ESP32 4-Channel PWM Fan Controller on Tindie →</strong>
+  </a>
+</p>
+
+> **English is the primary language of this repository.** Firmware configurations
+> are maintained in English first ([`firmware/en/`](./firmware/en/)), with a
+> functionally identical Chinese edition in [`firmware/zh/`](./firmware/zh/).
+> Documentation is English-first too; the Chinese editions live in
+> [`README_ZH.md`](./README_ZH.md) and [`docs/wiki/zh/`](./docs/wiki/zh/Home.md).
+
+An ESPHome-based 4-channel PWM fan controller with Home Assistant integration, a Web control panel, and an HTTP REST API. Each fan can be controlled and monitored independently. The v2.0 firmware also supports DS18B20 temperature control and LD2402G mmWave radar expansion.
 
 <div style="text-align: center;">
   <table>
     <tr>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/pcb.jpg" width="450" alt="PCB 实物图"/></td>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/physical.jpg" width="450" alt="测试图"/></td>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha01.png" width="250" alt="Home Assistant 控制界面"/></td>
-      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha02.png" width="250" alt="Home Assistant 设备诊断信息"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/pcb.jpg" width="450" alt="PCB board"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/hardware/physical.jpg" width="450" alt="Test setup"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha01.png" width="250" alt="Home Assistant control interface"/></td>
+      <td width="25%" style="padding: 10px;"><img src="./docs/images/screenshots/ha02.png" width="250" alt="Home Assistant device diagnostics"/></td>
     </tr>
   </table>
 </div>
 
-## 文档与 Wiki
+## Documentation / Wiki
 
-除本 README 外，项目还提供一套完整的中英双语 Wiki：
+Beyond this README, the project ships a complete bilingual wiki:
 
-| 主题 | 中文 | English |
-|:-----|:-----|:--------|
-| 首页 / 导航 | [中文首页](./docs/wiki/zh/Home.md) | [Wiki home](./docs/wiki/en/Home-EN.md) |
-| 快速上手 | [快速上手](./docs/wiki/zh/Getting-Started.md) | [Getting started](./docs/wiki/en/Getting-Started-EN.md) |
-| 固件版本与编译 | [固件版本](./docs/wiki/zh/Firmware.md) | [Firmware](./docs/wiki/en/Firmware-EN.md) |
-| 实体清单与参数 | [实体参考](./docs/wiki/zh/Entities.md) | [Entities](./docs/wiki/en/Entities-EN.md) |
-| 温度控制 | [温度控制](./docs/wiki/zh/Temperature-Control.md) | [Temperature control](./docs/wiki/en/Temperature-Control-EN.md) |
-| 毫米波雷达 | [毫米波雷达](./docs/wiki/zh/Radar.md) | [mmWave radar](./docs/wiki/en/Radar-EN.md) |
-| HTTP API | [HTTP API](./docs/wiki/zh/HTTP-API.md) | [HTTP API](./docs/wiki/en/HTTP-API-EN.md) |
-| HA 集成与自动化 | [Home Assistant](./docs/wiki/zh/Home-Assistant.md) | [Home Assistant](./docs/wiki/en/Home-Assistant-EN.md) |
-| 硬件资料 | [硬件资料](./docs/wiki/zh/Hardware.md) | [Hardware](./docs/wiki/en/Hardware-EN.md) |
-| 故障排查 | [故障排查](./docs/wiki/zh/Troubleshooting.md) | [Troubleshooting](./docs/wiki/en/Troubleshooting-EN.md) |
-| 常见问题 | [常见问题](./docs/wiki/zh/FAQ.md) | [FAQ](./docs/wiki/en/FAQ-EN.md) |
-| 开发指南 | [开发指南](./docs/wiki/zh/Development.md) | [Development](./docs/wiki/en/Development-EN.md) |
-| 更新记录 | [更新记录](./docs/wiki/zh/Changelog.md) | [Changelog](./docs/wiki/en/Changelog-EN.md) |
+| Topic | English | 中文 |
+|:------|:--------|:-----|
+| Home / navigation | [Wiki home](./docs/wiki/en/Home-EN.md) | [中文首页](./docs/wiki/zh/Home.md) |
+| Quick start | [Getting started](./docs/wiki/en/Getting-Started-EN.md) | [快速上手](./docs/wiki/zh/Getting-Started.md) |
+| Firmware and builds | [Firmware](./docs/wiki/en/Firmware-EN.md) | [固件版本](./docs/wiki/zh/Firmware.md) |
+| Entities and parameters | [Entities](./docs/wiki/en/Entities-EN.md) | [实体参考](./docs/wiki/zh/Entities.md) |
+| Temperature control | [Temperature control](./docs/wiki/en/Temperature-Control-EN.md) | [温度控制](./docs/wiki/zh/Temperature-Control.md) |
+| mmWave radar | [mmWave radar](./docs/wiki/en/Radar-EN.md) | [毫米波雷达](./docs/wiki/zh/Radar.md) |
+| HTTP API | [HTTP API](./docs/wiki/en/HTTP-API-EN.md) | [HTTP API](./docs/wiki/zh/HTTP-API.md) |
+| HA integration and automations | [Home Assistant](./docs/wiki/en/Home-Assistant-EN.md) | [Home Assistant](./docs/wiki/zh/Home-Assistant.md) |
+| Hardware | [Hardware](./docs/wiki/en/Hardware-EN.md) | [硬件资料](./docs/wiki/zh/Hardware.md) |
+| Troubleshooting | [Troubleshooting](./docs/wiki/en/Troubleshooting-EN.md) | [故障排查](./docs/wiki/zh/Troubleshooting.md) |
+| FAQ | [FAQ](./docs/wiki/en/FAQ-EN.md) | [常见问题](./docs/wiki/zh/FAQ.md) |
+| Development | [Development](./docs/wiki/en/Development-EN.md) | [开发指南](./docs/wiki/zh/Development.md) |
+| Changelog | [Changelog](./docs/wiki/en/Changelog-EN.md) | [更新记录](./docs/wiki/zh/Changelog.md) |
 
-> Wiki 源文件位于 [`docs/wiki/`](./docs/wiki/)，可一键发布为 GitHub Wiki，发布与维护方法见 [docs/wiki/README.md](./docs/wiki/README.md)。
+> The wiki sources live in [`docs/wiki/`](./docs/wiki/) and can be published to the GitHub Wiki in one command — see [docs/wiki/README.md](./docs/wiki/README.md) for the publishing workflow and conventions.
 
-## 1. 固件版本与下载
+## 1. Firmware Versions and Downloads
 
-### 1.1 先确认硬件版本
+### 1.1 Check the Hardware First
 
-刷写前请先确认主控硬件与固件匹配：
+**Since 2026-11-12 every controller sold is a dual-core model**, and the active firmware is v2.0 built for dual-core operation. The whole v1.0 line (dual-core and single-core) and the v2.0 single-core variants shipped before that date are archived under [`firmware/*/archive/`](./firmware/en/archive/) and are only intended for older hardware.
 
-> **成品设备通常采用单核设计，只能刷入 `v1.0 单核` 或任意 `v2.0` 固件。请勿将 `v1.0 双核` 固件刷入单核设备，否则设备将无法启动。**
+> A single-core board cannot boot dual-core firmware — owners of an older single-core controller must flash the matching archived single-core build. The other direction is safe: a dual-core board can also run the archived single-core firmware, it just leaves one core idle. v1.0 builds remain available as archived configs for v1.0 boards.
 
-### 1.2 固件选择
+### 1.2 Firmware Selection
 
-| 固件版本 | 处理器 | 主要功能 | 适用场景 |
-|:---------|:------:|:---------|:---------|
-| **v1.0 双核** | 双核 | 4 路风扇控制、转速显示、Web、HTTP API、诊断、BLE Proxy | 确认使用双核硬件，且需要较高性能 |
-| **v1.0 单核** | 单核 | 4 路风扇控制、转速显示、Web、HTTP API、诊断、BLE Proxy | v1.0 单核硬件，使用 HA 自动化控温 |
-| **v2.0 Basic** | 单核 | 基础 4 路风扇控制、转速显示、Web、HTTP API、诊断、BLE Proxy | v2.0 硬件，不使用本地温度和雷达 |
-| **v2.0 DS18B20** | 单核 | v2.0 Basic 功能 + 最多 4 个 DS18B20 温度传感器 + 本地自动调速 | 服务器、机柜、NAS 等需要脱离 HA 独立控温的场景 |
-| **v2.0 DS18B20+雷达** | 单核 | DS18B20 版本功能 + LD2402G 24GHz 毫米波人体存在检测 | 需要按人体存在状态联动的智能家居场景 |
+| Firmware | CPU | Main Features | Recommended Use |
+|:---------|:---:|:--------------|:----------------|
+| **v2.0 Basic** | Dual-core | Basic 4-channel fan control, RPM display, Web UI, HTTP API, diagnostics, BLE Proxy | v2.0 hardware without local temperature or radar control |
+| **v2.0 DS18B20** | Dual-core | v2.0 Basic features + up to 4 DS18B20 sensors + local automatic speed control | Standalone cooling for servers, racks, and NAS devices |
+| **v2.0 DS18B20 + Radar** | Dual-core | DS18B20 features + LD2402G 24GHz mmWave presence detection | Smart home scenarios requiring presence-based fan automation |
 
-所有版本均支持：
+> **v1.0 is archived.** Both the v1.0 dual-core and v1.0 single-core configurations live in [`firmware/en/archive/v1.0/`](./firmware/en/archive/v1.0/) and [`firmware/zh/archive/v1.0/`](./firmware/zh/archive/v1.0/); they are no longer built by CI or published in Releases.
 
-- 4 路风扇独立 PWM 调速，速度范围为 1-100%，支持完全断电停转。
-- 4 路风扇转速（RPM）读取。
-- Home Assistant ESPHome 集成、Web 控制面板和 HTTP REST API。
-- 运行时间、Wi-Fi 信号、IP 地址、SSID 和 ESPHome 版本等诊断实体。
-- 蓝牙代理（BLE Proxy），用于扩展 Home Assistant 的蓝牙覆盖范围。
+All firmware variants support:
 
-### 1.3 功能对比
+- Independent PWM control of 4 fans from 1-100%, including complete power shutdown.
+- RPM readings for all 4 fans.
+- Home Assistant ESPHome integration, a Web control panel, and an HTTP REST API.
+- Diagnostic entities for uptime, Wi-Fi signal, IP address, SSID, and ESPHome version.
+- BLE Proxy for extending Home Assistant Bluetooth coverage.
 
-| 功能 | v1.0 双核 | v1.0 单核 | v2.0 Basic | v2.0 DS18B20 | v2.0 + 雷达 |
-|:-----|:--------:|:---------:|:----------:|:------------:|:-----------:|
-| 4 路 PWM 风扇控制 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 完全断电停转 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 实时转速显示 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Web 界面 / HTTP API | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 诊断实体 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 蓝牙代理 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| DS18B20 温度控制 | - | - | - | ✅ | ✅ |
-| LD2402G 毫米波雷达 | - | - | - | - | ✅ |
+### 1.3 Feature Comparison
 
-### 1.4 下载预编译固件
+| Feature | v2.0 Basic | v2.0 DS18B20 | v2.0 + Radar |
+|:--------|:----------:|:------------:|:------------:|
+| 4-channel PWM fan control | ✅ | ✅ | ✅ |
+| Complete power shutdown | ✅ | ✅ | ✅ |
+| Real-time RPM display | ✅ | ✅ | ✅ |
+| Web UI / HTTP API | ✅ | ✅ | ✅ |
+| Diagnostic entities | ✅ | ✅ | ✅ |
+| BLE Proxy | ✅ | ✅ | ✅ |
+| DS18B20 temperature control | - | ✅ | ✅ |
+| LD2402G mmWave radar | - | - | ✅ |
 
-固件由 GitHub Actions 自动编译并发布，无需手动打包：
+The archived v1.0 and single-core builds provide the same feature set as their v2.0 counterparts (v1.0 lacks temperature and radar support); only the CPU scheduling differs.
 
-[前往 GitHub Releases 下载](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/releases)
+### 1.4 Download Pre-built Firmware
 
-每个版本包含以下 3 类文件：
+Firmware is compiled and published automatically by GitHub Actions:
 
-| 文件后缀 | 用途 |
-|:---------|:-----|
-| `.firmware.bin` | 常规刷写使用的标准固件 |
-| `.firmware.factory.bin` | 完整恢复出厂设置时使用的工厂固件 |
-| `.firmware.ota.bin` | 已联网设备的 OTA 升级固件 |
+[Go to GitHub Releases](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/releases)
 
-Release 中的版本名称与配置文件对应关系如下：
+Each firmware variant includes these 3 file types:
 
-| Release 名称 | 配置文件 |
-|:-------------|:---------|
-| `v1.0-dual-core` | `firmware/v1.0/dual-core/config.yaml` |
-| `v1.0-single-core` | `firmware/v1.0/single-core/config.yaml` |
-| `v2.0-basic` | `firmware/v2.0/single-core/basic/config.yaml` |
-| `v2.0-ds18b20` | `firmware/v2.0/single-core/ds18b20/config.yaml` |
-| `v2.0-ds18b20-radar` | `firmware/v2.0/single-core/ds18b20-radar/config.yaml` |
+| File Suffix | Purpose |
+|:------------|:--------|
+| `.firmware.bin` | Standard firmware for regular flashing |
+| `.firmware.factory.bin` | Factory firmware for a complete factory reset |
+| `.firmware.ota.bin` | OTA upgrade firmware for networked devices |
 
-### 1.5 自定义编译
+Release names and their corresponding configuration files. Every active version
+is built in two languages — **English is the primary/recommended build**, Chinese
+keeps the original entity names:
 
-需要修改 Wi-Fi、实体名称或其他 ESPHome 配置时，可以直接编辑上表中的 `config.yaml`，然后使用 ESPHome 编译和刷写。所有配置文件都使用 ESP32 DevKit、ESP-IDF 框架；v1.0 单核和 v2.0 固件明确启用了单核运行配置。
+| Release Name | Language | Configuration File |
+|:-------------|:---------|:-------------------|
+| `v2.0-basic-en` | English | `firmware/en/v2.0/dual-core/basic/config.yaml` |
+| `v2.0-basic-zh` | Chinese | `firmware/zh/v2.0/dual-core/basic/config.yaml` |
+| `v2.0-ds18b20-en` | English | `firmware/en/v2.0/dual-core/ds18b20/config.yaml` |
+| `v2.0-ds18b20-zh` | Chinese | `firmware/zh/v2.0/dual-core/ds18b20/config.yaml` |
+| `v2.0-ds18b20-radar-en` | English | `firmware/en/v2.0/dual-core/ds18b20-radar/config.yaml` |
+| `v2.0-ds18b20-radar-zh` | Chinese | `firmware/zh/v2.0/dual-core/ds18b20-radar/config.yaml` |
 
-### 1.6 多台设备与设备命名
+> **v1.0 and all single-core builds are archived**, not published as release
+> artifacts. The configs remain in `firmware/en/archive/` and
+> `firmware/zh/archive/` (v1.0 dual-core and single-core, plus the
+> pre-2026-11-12 v2.0 single-core variants) if you need to compile one for an
+> older board.
 
-所有版本的固件都启用了 `name_add_mac_suffix: true`：
+The full firmware catalogue, including the language and active/archive
+comparison, is in [`firmware/README.md`](./firmware/README.md).
 
-- **同一份固件可以直接刷到任意多台设备**，不需要为每台单独编译打包。
-- 设备启动时会自动把自身 MAC 地址的最后 3 字节追加到名字后面：node name 形如 `esp32pwm22810-a1b2c3`，Home Assistant 中的设备名形如 `ESP32 PWM 22810 a1b2c3`。
-- 实体 ID 同样带该后缀（形如 `fan.esp32_pwm_22810_a1b2c3_feng_shan_1`），同一网络下的多台控制器互不影响。
-- mDNS 主机名（`<node name>.local`）与 OTA 目标地址也一并带上后缀。
+### 1.5 Custom Compilation
 
-> **为什么必须这样做**：Home Assistant 以固件中的 `name` 作为 ESPHome 设备的唯一标识。多台设备使用同一个 `name` 时，HA 会触发[名称冲突解决](https://www.home-assistant.io/integrations/esphome/#reconfiguration-and-device-replacement)：只提供「迁移」和「覆盖」两个选项，后添加的设备会直接覆盖已有设备，两台设备无法同时存在。
+To change Wi-Fi, entity names, or other ESPHome settings, edit the corresponding `config.yaml` above and compile or flash it with ESPHome. All active configurations use the ESP32 DevKit board, the ESP-IDF framework, and both CPU cores; only the archived single-core builds set `CONFIG_FREERTOS_UNICORE: "y"`.
 
-如果希望设备名更整齐（例如 `fanctrl-01`），也可以为每台设备单独编译一次，用替换变量命名：
+### 1.6 Multiple Devices and Device Naming
+
+Every firmware variant enables `name_add_mac_suffix: true`:
+
+- **The same firmware binary can be flashed to any number of devices** — no per-device compilation required.
+- At boot, each device appends the last 3 bytes of its own MAC address to its name: the node name looks like `esp32pwm22810-a1b2c3`, and the Home Assistant device name looks like `ESP32 PWM 22810 a1b2c3`.
+- Entity IDs carry the same suffix (for example `fan.esp32_pwm_22810_a1b2c3_fan_1` in the English firmware), so several controllers in one network never collide.
+- The mDNS hostname (`<node name>.local`) and the OTA target address include the suffix as well.
+
+> **Why this is required**: Home Assistant identifies an ESPHome device by the `name` compiled into its firmware. When several devices share one `name`, HA starts [name conflict resolution](https://www.home-assistant.io/integrations/esphome/#reconfiguration-and-device-replacement), which only offers **Migrate** or **Overwrite** — the device added later overwrites the existing one, and the two can never coexist.
+
+To get tidier names (for example `fanctrl-01`), compile one binary per device with a substitution instead:
 
 ```yaml
 substitutions:
@@ -126,146 +152,146 @@ esphome:
   name_add_mac_suffix: false
 ```
 
-注意：开启后缀后 `name` 最长只能 24 个字符（ESPHome 主机名上限 31 个字符，后缀占 7 个字符），`esp32pwm22810` 远低于该限制。
+Note: with the suffix enabled, `name` is limited to 24 characters (the ESPHome hostname limit is 31 characters and the suffix takes 7), which `esp32pwm22810` is well below.
 
-## 2. 快速上手
+## 2. Quick Start
 
-### 2.1 供电
+### 2.1 Power Supply
 
-| 供电方式 | 接口 | 电压 | 说明 |
-|:---------|:-----|:-----|:-----|
-| **DC 接口（推荐）** | DC 座 | 12V / 2A 以上 | 正常运行，同时为风扇和 ESP32 供电 |
-| Type-C 接口 | USB-C | 5V | 仅用于刷写和调试，不能驱动风扇正常工作 |
+| Power Method | Interface | Voltage | Description |
+|:-------------|:----------|:--------|:------------|
+| **DC jack (recommended)** | DC barrel jack | 12V / 2A or higher | Normal operation; powers the fans and ESP32 |
+| Type-C port | USB-C | 5V | Flashing and debugging only; cannot drive the fans normally |
 
-### 2.2 首次配网
+### 2.2 First-time Wi-Fi Setup
 
-设备上电后会创建无密码 Wi-Fi 热点 `ESP32-Fan-22810`：
+After startup, the device creates an open Wi-Fi hotspot named `ESP32-Fan-22810`:
 
-1. 使用手机或电脑连接 `ESP32-Fan-22810`。
-2. 浏览器访问 `http://192.168.4.1`（推荐）。mDNS 主机名带 MAC 后缀，形如 `http://esp32pwm22810-xxxxxx.local`。
-3. 在 Wi-Fi 配置向导中选择目标 Wi-Fi 并输入密码。
-4. 设备连接成功后会自动重启。
+1. Connect to `ESP32-Fan-22810` with a phone or computer.
+2. Open `http://192.168.4.1` (recommended). The mDNS hostname carries the MAC suffix, for example `http://esp32pwm22810-xxxxxx.local`.
+3. Select the target Wi-Fi network and enter its password.
+4. The device connects and reboots automatically.
 
-如果需要跳过首次配网，可以在刷写前于配置文件中预设 `wifi.ssid` 和 `wifi.password`。
+To skip first-time setup, set `wifi.ssid` and `wifi.password` in the configuration file before flashing.
 
-### 2.3 刷写固件
+### 2.3 Flash the Firmware
 
-使用 Type-C 连接设备和电脑，选择对应硬件的固件，使用 ESPHome 刷写工具或 `esptool` 完成首次刷写——多台设备都刷同一个 `.bin` 即可。设备联网后可以使用 `.firmware.ota.bin` 远程升级，OTA 目标填写该设备自身的 IP 或主机名。
+Connect the device to a computer with a Type-C cable, select the firmware matching the hardware, and flash it with the ESPHome flashing tool or `esptool` — flash the very same `.bin` to every device. Once the device is online, use `.firmware.ota.bin` for remote updates and point the OTA target at that device's own IP or hostname.
 
-### 2.4 接入 Home Assistant
+### 2.4 Add the Device to Home Assistant
 
-先确保已安装 Home Assistant 的 ESPHome 集成：
+Make sure the Home Assistant ESPHome integration is installed:
 
-1. 打开 **设置 → 设备与服务 → 添加集成**，搜索 **ESPHome**。
-2. 选择自动发现的那台设备 `ESP32 PWM 22810 xxxxxx`（`xxxxxx` 为该设备的 MAC 后缀），或手动输入设备 IP 地址。
-3. 输入以下配置文件中的 API 加密密钥并提交：
+1. Open **Settings → Devices & Services → Add Integration** and search for **ESPHome**.
+2. Select the discovered `ESP32 PWM 22810 xxxxxx` (`xxxxxx` is that device's MAC suffix), or enter its IP address manually.
+3. Enter the API encryption key from the configuration files:
 
    ```text
    LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk=
    ```
 
-接入后通常会出现以下实体：
+The following entities are normally created:
 
-| 实体类型 | 数量 | 说明 |
-|:---------|:----:|:-----|
-| 风扇 | 4 个 | 独立开关和 1-100% 调速 |
-| 转速传感器 | 4 个 | 单位为 RPM |
-| 温度传感器 | 4 个 | 仅 v2.0 DS18B20 及雷达固件，名称为温度 A/B/C/D |
-| 蓝牙代理 | 1 个 | BLE Proxy 节点 |
-| 诊断实体 | 若干 | 运行时间、Wi-Fi 信号、IP、SSID、ESPHome 版本等 |
+| Entity Type | Count | Description |
+|:------------|:-----:|:------------|
+| Fan | 4 | Independent on/off and 1-100% speed control |
+| RPM sensor | 4 | Unit: RPM |
+| Temperature sensor | 4 | Only in v2.0 DS18B20 and Radar firmware; Temp A/B/C/D |
+| BLE Proxy | 1 | BLE Proxy node |
+| Diagnostic entities | Several | Uptime, Wi-Fi signal, IP, SSID, ESPHome version, etc. |
 
-### 2.5 Web 控制面板
+### 2.5 Web Control Panel
 
-浏览器访问 `http://设备IP` 即可打开 Web 控制面板，不依赖 Home Assistant。面板可以查看 4 路风扇状态、独立调节风速并查看设备运行信息。
+Open `http://device-ip` in a browser to access the Web control panel without Home Assistant. The panel shows all 4 fan states, allows independent speed adjustment, and displays device information.
 
-### 2.6 多台设备同时接入
+### 2.6 Adding Several Devices Right Away
 
-每台设备的名字都带自己的 MAC 后缀，因此可以按同样步骤重复添加任意多台控制器：在 **设置 → 设备与服务** 中选中自动发现的那台 `ESP32 PWM 22810 xxxxxx`，输入同一个 API 加密密钥即可，多台设备会作为独立条目并存。
+Because each device carries its own MAC suffix, you can repeat the same steps for any number of controllers: pick the discovered `ESP32 PWM 22810 xxxxxx` under **Settings → Devices & Services** and enter the same API encryption key — the devices coexist as separate entries.
 
-如果之前已经用重名固件接入过某台设备，请先删除那条旧条目（**设置 → 设备与服务 → ESPHome → 删除**），再重新添加。设备名后缀就是该设备 MAC 地址的最后 3 字节，可与路由器 DHCP 列表或设备页面核对，避免认错设备。
+If a device was added earlier while running the old, identically named firmware, delete that stale entry first (**Settings → Devices & Services → ESPHome → Delete**) and add the device again. The name suffix is the last 3 bytes of that device's MAC address, so compare it with the router's DHCP list or the device page to avoid mixing devices up.
 
-## 3. v2.0 温度与雷达功能
+## 3. v2.0 Temperature and Radar Features
 
-### 3.1 DS18B20 接线
+### 3.1 DS18B20 Wiring
 
-DS18B20 接入 v2.0 板载 **GPIO14** 的 3PIN 排针，使用 1-Wire 总线：
+Connect DS18B20 sensors to the onboard **GPIO14** 3-pin header using the 1-Wire bus:
 
-| DS18B20 引脚 | 连接位置 |
-|:------------:|:---------|
-| VCC | 3.3V 或 5V |
+| DS18B20 Pin | Connection |
+|:-----------:|:-----------|
+| VCC | 3.3V or 5V |
 | GND | GND |
 | DATA | GPIO14 |
 
-配置已集成上拉电阻，GPIO14 总线最多可并联 4 个 DS18B20。固件按总线索引将其命名为 **温度 A、温度 B、温度 C、温度 D**。
+The board includes a pull-up resistor. Up to 4 DS18B20 sensors can be connected in parallel to GPIO14 and are named **Temp A, Temp B, Temp C, and Temp D** according to their bus index.
 
-### 3.2 本地温度调速
+### 3.2 Local Temperature Control
 
-本节适用于 `v2.0-ds18b20` 和 `v2.0-ds18b20-radar` 固件。接入设备后，在 Home Assistant 的 **ESP32 PWM 22810 xxxxxx** 设备页面中，为每路风扇设置温度源和参数：
+This section applies to `v2.0-ds18b20` and `v2.0-ds18b20-radar`. In the Home Assistant device page for **ESP32 PWM 22810 xxxxxx**, configure a temperature source and parameters for each fan:
 
-| 参数 | 作用 | 默认值 |
-|:-----|:-----|:------:|
-| 温度源绑定 `F-Src` | 选择未绑定或温度 A/B/C/D | 风扇 1-4 分别绑定 A-D |
-| 启控温度 `T-Min` | 温度低于或等于该值时断电停转 | 30°C |
-| 满载温度 `T-Max` | 温度高于或等于该值时使用最高风速 | 50°C |
-| 最低风速 `F-Min` | 线性调速区间的最低风速 | 0% |
-| 最高风速 `F-Max` | 线性调速区间的最高风速 | 100% |
+| Parameter | Description | Default |
+|:----------|:------------|:-------:|
+| Temperature source `F-Src` | Select unbound or Temp A/B/C/D | Fans 1-4 use A-D respectively |
+| Trigger temperature `T-Min` | At or below this temperature, power the fan off | 30°C |
+| Full-speed temperature `T-Max` | At or above this temperature, use the maximum speed | 50°C |
+| Minimum speed `F-Min` | Minimum speed in the linear control range | 0% |
+| Maximum speed `F-Max` | Maximum speed in the linear control range | 100% |
 
-控制逻辑：
+Control logic:
 
 ```text
-温度 ≤ T-Min                   → 断电完全关停风扇
-T-Min < 温度 < T-Max           → 按温度线性比例调速
-温度 ≥ T-Max                   → 以 F-Max 运行
-温度读取异常                    → 保持当前风速和运行状态
+Temperature ≤ T-Min                   → Completely power off the fan
+T-Min < Temperature < T-Max           → Linear proportional speed control
+Temperature ≥ T-Max                   → Run at F-Max
+Temperature read failure              → Keep the current speed and state
 ```
 
-上述参数支持掉电保持。未绑定温度源的风扇不会执行本地温控逻辑，仍可通过 Home Assistant、Web 或 HTTP API 手动控制。
+These parameters persist across power cycles. A fan with no bound temperature source is not controlled by the local temperature logic and can still be controlled manually through Home Assistant, the Web UI, or the HTTP API.
 
-### 3.3 LD2402G 雷达接口
+### 3.3 LD2402G Radar Interface
 
-仅 `v2.0-ds18b20-radar` 固件启用雷达串口：
+The radar UART is enabled only by `v2.0-ds18b20-radar`:
 
-| 雷达接口 | 控制器接口 |
-|:---------|:-----------|
-| TX | GPIO4（UART RX） |
-| RX | GPIO5（UART TX） |
-| 电源 / 地 | v2.0 开发者排针的 5V / GND |
+| Radar Pin | Controller Pin |
+|:----------|:---------------|
+| TX | GPIO4 (UART RX) |
+| RX | GPIO5 (UART TX) |
+| Power / Ground | 5V / GND on the v2.0 developer header |
 
-串口速率为 `115200`。雷达固件提供目标存在状态和目标距离实体，并提供最近、最远距离过滤参数，默认范围为 `0.10-1.5 m`。雷达与风扇、温度控制的联动关系可在 Home Assistant 中通过自动化配置。
+The UART speed is `115200`. The radar firmware provides target presence and target distance entities, plus configurable minimum and maximum distance filters. The default range is `0.10-1.5 m`. Use Home Assistant automations to link radar presence with fan and temperature control.
 
-## 4. Home Assistant 自动化控温
+## 4. Home Assistant Temperature Automation
 
-v2.0 DS18B20 固件已经支持本地温控；以下方式适用于所有版本，尤其适合 v1.0，或需要使用 CPU 温度、环境温度等 Home Assistant 外部温度源的场景。
+The v2.0 DS18B20 firmware already supports local temperature control. The following method works with all firmware versions and is especially useful for v2.0 Basic, the archived v1.0 builds, or for external temperature sources such as CPU and ambient temperature sensors exposed by Home Assistant.
 
-### 4.1 配置步骤
+### 4.1 Configuration Steps
 
-1. 打开 Home Assistant → **自动化与场景 → 创建自动化**。
-2. 点击右上角 **更多 → YAML 编辑**。
-3. 粘贴下方模板。
-4. 将温度传感器和风扇实体 ID 替换为自己的实体后保存。
+1. Open Home Assistant → **Automations & Scenes → Create Automation**.
+2. Select **More → Edit in YAML** in the top-right corner.
+3. Paste the template below.
+4. Replace the temperature sensor and fan entity IDs, then save.
 
-### 4.2 YAML 模板
+### 4.2 YAML Template
 
 ```yaml
-alias: "通用智能风扇线性调速"
-description: "根据温度传感器数值线性控制风扇 PWM 占空比"
+alias: "Smart Fan Linear Speed Control"
+description: "Linearly controls fan PWM duty cycle based on temperature sensor readings"
 mode: restart
 
 trigger:
   - platform: state
-    entity_id: sensor.nas_temperature_x86_pkg_temp  # 需要修改
+    entity_id: sensor.nas_temperature_x86_pkg_temp  # Change this
 
 condition:
   - condition: template
-    value_template: "{{ is_number(states('sensor.nas_temperature_x86_pkg_temp')) }}"  # 需要修改
+    value_template: "{{ is_number(states('sensor.nas_temperature_x86_pkg_temp')) }}"  # Change this
 
 action:
   - service: fan.set_percentage
     target:
-      entity_id: fan.fan_1  # 需要修改
+      entity_id: fan.fan_1  # Change this
     data:
       percentage: >
-        {% set current_temp = states('sensor.nas_temperature_x86_pkg_temp') | float(0) %}  {# 需要修改 #}
+        {% set current_temp = states('sensor.nas_temperature_x86_pkg_temp') | float(0) %}  {# Change this #}
         {% set t_min = 30 %}
         {% set t_max = 50 %}
         {% set f_min = 0 %}
@@ -280,112 +306,120 @@ action:
         {% endif %}
 ```
 
-![温度与风速关系](./docs/images/diagrams/speed-chart.png)
+![Temperature vs. Speed](./docs/images/diagrams/speed-chart.png)
 
-常见温度源示例：
+Common temperature source examples:
 
-| 温度来源 | 获取方式 | 示例实体 ID |
-|:---------|:---------|:------------|
-| 电脑 / 服务器 CPU | Glances 集成 | `sensor.nas_temperature_x86_pkg_temp` |
-| 温湿度传感器 | Zigbee2MQTT / ZHA | `sensor.temperature_humidity_sensor_temperature` |
-| 空调 / 暖气 | 智能空调集成 | `climate.living_air_conditioner` |
-| 群晖 NAS | Synology DSM 集成 | `sensor.synology_disk_1_temperature` |
-| 其他 ESPHome 设备 | ESPHome 集成 | 按实际设备填写 |
+| Temperature Source | Integration | Example Entity ID |
+|:-------------------|:------------|:------------------|
+| PC / server CPU | Glances | `sensor.nas_temperature_x86_pkg_temp` |
+| Temperature / humidity sensor | Zigbee2MQTT / ZHA | `sensor.temperature_humidity_sensor_temperature` |
+| Air conditioner / heater | Smart AC integration | `climate.living_air_conditioner` |
+| Synology NAS | Synology DSM integration | `sensor.synology_disk_1_temperature` |
+| Other ESPHome device | ESPHome integration | Use the actual entity ID |
 
 ## 5. HTTP REST API
 
-项目内置 Web Server，可以通过局域网 HTTP 请求控制风扇或读取传感器。控制命令使用 **POST**，状态读取使用 **GET**。实体名称包含中文时，URL 必须进行 UTF-8 编码。
+The built-in Web Server accepts LAN HTTP requests for fan control and sensor readings. Use **POST** for control commands and **GET** for status queries. The English firmware uses ASCII entity names, so most URLs need no special encoding (spaces become `%20`); the Chinese build keeps Chinese names and therefore needs full UTF-8 percent-encoding.
 
-### 5.1 实体与路径示例
+### 5.1 Entity and Path Examples
 
-ESPHome 会根据配置中的 `name` 自动生成实体 ID。以下为第 1 路风扇示例：
+ESPHome generates entity IDs from the configured `name`. The following examples show Fan 1 of the English build:
 
-| 实体名称 | entity_id | URL 路径 |
-|:---------|:----------|:---------|
-| 风扇 1 | `fan.风扇_1` | `/fan/%E9%A3%8E%E6%89%87_1` |
-| 风扇 1 转速 | `sensor.风扇_1_转速` | `/sensor/%E9%A3%8E%E6%89%87_1_%E8%BD%AC%E9%80%9F` |
+| Entity Name | HA `entity_id` (example with MAC suffix) | URL Path |
+|:------------|:-----------------------------------------|:---------|
+| Fan 1 | `fan.esp32_pwm_22810_a1b2c3_fan_1` | `/fan/Fan%201` |
+| Fan 1 RPM | `sensor.esp32_pwm_22810_a1b2c3_fan_1_rpm` | `/sensor/Fan%201%20RPM` |
 
-如需调用其他风扇，请按配置中的实体名称替换路径。也可以优先使用 Home Assistant 的 `fan.set_percentage` 服务，避免手动处理中文 URL。
+Replace the entity name in the path for other fans. Alternatively, use Home Assistant's `fan.set_percentage` service to avoid handling URL encoding manually.
 
-### 5.2 Python 示例
+> The `zh/` builds use names such as `风扇 1` and `风扇 1 转速`, so their paths are percent-encoded (for example `/fan/%E9%A3%8E%E6%89%87%201`).
+
+### 5.2 Python Example
 
 ```python
 import requests
 from urllib.parse import quote
 
-base = "http://10.0.20.83"  # 替换为设备 IP
+base = "http://10.0.20.83"  # Replace with the device IP
 
-# 开启 2 号风扇并设置为 50%
-requests.post(f"{base}/fan/{quote('风扇 2')}/turn_on", params={"speed_level": 50})
+# Turn on Fan 2 and set it to 50%
+requests.post(f"{base}/fan/{quote('Fan 2')}/turn_on", params={"speed_level": 50})
 
-# 关闭 2 号风扇
-requests.post(f"{base}/fan/{quote('风扇 2')}/turn_off")
+# Turn off Fan 2
+requests.post(f"{base}/fan/{quote('Fan 2')}/turn_off")
 
-# 读取 1 号风扇转速
-response = requests.get(f"{base}/sensor/{quote('风扇 1 转速')}")
+# Read the RPM of Fan 1
+response = requests.get(f"{base}/sensor/{quote('Fan 1 RPM')}")
 if response.status_code == 200:
-    print("当前转速:", response.json()["value"])
+    print("Current RPM:", response.json()["value"])
 ```
 
-## 6. 硬件资料与接口
+## 6. Hardware Files and Interfaces
 
-### 6.1 硬件文件
+### 6.1 Hardware Files
 
-v2.0 为推荐硬件版本：
+v2.0 is the recommended hardware version:
 
-| 类型 | v2.0 文件 | v1.0 文件 |
+| Type | v2.0 File | v1.0 File |
 |:-----|:----------|:----------|
 | PCB Gerber | [gerber.zip](./hardware/v2.0/pcb/gerber.zip) | [gerber.zip](./hardware/v1.0/pcb/gerber.zip) |
-| BOM 清单 | [bom.xlsx](./hardware/v2.0/pcb/bom.xlsx) | [bom.xlsx](./hardware/v1.0/pcb/bom.xlsx) |
-| 立创 EDA 工程 | [project.epro2](./hardware/v2.0/pcb/project.epro2) | [project.epro2](./hardware/v1.0/pcb/project.epro2) |
-| 外壳主体 | [case.STEP](./hardware/v2.0/3d-models/print/case.STEP) | [case.step](./hardware/v1.0/3d-models/print/case.step) |
-| 上盖 | [top-cover.STEP](./hardware/v2.0/3d-models/print/top-cover.STEP) | [top-cover.step](./hardware/v1.0/3d-models/print/top-cover.step) |
+| BOM | [bom.xlsx](./hardware/v2.0/pcb/bom.xlsx) | [bom.xlsx](./hardware/v1.0/pcb/bom.xlsx) |
+| LCSC EDA project | [project.epro2](./hardware/v2.0/pcb/project.epro2) | [project.epro2](./hardware/v1.0/pcb/project.epro2) |
+| Enclosure body | [case.STEP](./hardware/v2.0/3d-models/print/case.STEP) | [case.step](./hardware/v1.0/3d-models/print/case.step) |
+| Top cover | [top-cover.STEP](./hardware/v2.0/3d-models/print/top-cover.STEP) | [top-cover.step](./hardware/v1.0/3d-models/print/top-cover.step) |
 
-### 6.2 风扇接口映射
+### 6.2 Fan Pin Mapping
 
-| 风扇 | PWM 输出 | Tach 转速输入 | 电源管理 |
-|:----:|:--------:|:-------------:|:--------:|
+| Fan | PWM Output | Tachometer Input | Power Management |
+|:---:|:----------:|:----------------:|:----------------:|
 | Fan1 | GPIO16 | GPIO32 | GPIO21 |
 | Fan2 | GPIO17 | GPIO33 | GPIO22 |
 | Fan3 | GPIO18 | GPIO25 | GPIO23 |
 | Fan4 | GPIO19 | GPIO26 | GPIO13 |
 
-v2.0 额外接口：
+Additional v2.0 interfaces:
 
-| 接口 | 说明 |
-|:-----|:-----|
-| GPIO14（3PIN 排针） | DS18B20 1-Wire 温度总线 |
-| 4PIN 开发者排针（5V / GND / GPIO5 / GPIO4） | 可扩展 LD2402G 雷达、RS485 等外设 |
+| Interface | Description |
+|:----------|:------------|
+| GPIO14 (3-pin header) | DS18B20 1-Wire temperature bus |
+| 4-pin developer header (5V / GND / GPIO5 / GPIO4) | Expansion for LD2402G radar, RS485, and other peripherals |
 
-### 6.3 硬件设计要点
+### 6.3 Hardware Design Highlights
 
-- **风扇电源控制**：使用 `TPS22810DBVR` 直接切断风扇供电，实现真正的完全停转。
-- **电源方案**：12V → 5V（`TPS5430DDAR` DC-DC）→ 3.3V（`AMS1117-3.3`）。
-- **USB 转串口**：板载 `CH340C`，通过 Type-C 连接电脑刷写和调试。
+- **Fan power control**: `TPS22810DBVR` directly cuts fan power for complete shutdown.
+- **Power scheme**: 12V → 5V (`TPS5430DDAR` DC-DC) → 3.3V (`AMS1117-3.3`).
+- **USB-to-Serial**: Onboard `CH340C` for flashing and debugging over Type-C.
 
-## 7. 更新记录
+## 7. Changelog
 
-| 日期 | 更新内容 |
-|:-----|:---------|
-| 2026-11-09 | 新增中英双语 Wiki 文档（`docs/wiki/`）：快速上手、固件版本、实体参考、温度控制、毫米波雷达、HTTP API、HA 自动化、硬件资料、故障排查、FAQ、开发指南与更新记录。 |
-| 2026-10-14 | 固件启用 `name_add_mac_suffix`：同一份固件可刷多台设备，在 HA 中分别接入而不再互相覆盖。 |
-| 2026-08-16 | 自动调速时温度低于或等于 `T-Min` 时断电停转，温度恢复后自动重启风扇。 |
-| 2026-07-10 | DS18B20 读取异常时保持当前风速，移除异常时强制全速保护。 |
-| 2026-07-01 | 全版本增加蓝牙代理；CI 自动编译并发布 Release；移除仓库中的预编译固件。 |
-| v2.0 | 增加 DS18B20 温度控制、毫米波雷达固件和 v2.0 硬件设计。 |
-| v1.0 | 提供 Web 界面、HTTP REST API 和诊断实体。 |
+| Date | Changes |
+|:-----|:--------|
+| 2026-11-15 | The **entire v1.0 line** (dual-core and single-core) was archived to `firmware/*/archive/v1.0/`; Releases now contain only the v2.0 dual-core builds (6 artifacts: 3 variants × 2 languages). |
+| 2026-11-14 | v2.0 firmware is now built for **dual-core** operation (all controllers sold after 2026-11-12 are dual-core); single-core builds were moved to `firmware/*/archive/` and are no longer published as release artifacts. Added the Tindie purchase link for the assembled controller. |
+| 2026-11-14 | English-first release: pure-English firmware configs for every variant in `firmware/en/`, Chinese originals moved to `firmware/zh/`, and English promoted to the primary repository language (`readme.md`). |
+| 2026-11-09 | Added a bilingual wiki (`docs/wiki/`): quick start, firmware, entity reference, temperature control, mmWave radar, HTTP API, HA automations, hardware, troubleshooting, FAQ, development guide, and changelog. |
+| 2026-10-14 | Firmware now enables `name_add_mac_suffix`: one binary can be flashed to many devices and each one is added to HA separately instead of overwriting the previous device. |
+| 2026-08-16 | Fans are powered off when automatic control temperature is at or below `T-Min`, and restart when the temperature rises. |
+| 2026-07-10 | On DS18B20 read failure, keep the current fan speed and remove forced full-speed protection. |
+| 2026-07-01 | Added BLE Proxy to all variants; enabled CI firmware builds and Release publishing; removed pre-built firmware from the repository. |
+| v2.0 | Added DS18B20 temperature control, the mmWave radar firmware, and the v2.0 hardware design. |
+| v1.0 | Added the Web UI, HTTP REST API, and diagnostic entities. |
 
-## 8. 支持与许可证
+## 8. Support and License
 
-交流群二维码不再维护。
+Purchasing the assembled controller:
+[**ESP32 4-Channel PWM Fan Controller on Tindie**](https://www.tindie.com/products/esphome-fan-controllers/esp32-4-channel-pwm-fan-controller-homeassistant/)
+
+Community group QR codes are no longer maintained.
 
 <div style="text-align: center;">
   <table>
     <tr>
-      <td width="50%" style="padding: 10px;"><img src="./docs/images/donations/wechat.jpg" width="220" alt="微信打赏"/><p><small>微信</small></p></td>
-      <td width="50%" style="padding: 10px;"><img src="./docs/images/donations/alipay.jpg" width="220" alt="支付宝打赏"/><p><small>支付宝</small></p></td>
+      <td width="50%" style="padding: 10px;"><img src="./docs/images/donations/wechat.jpg" width="220" alt="WeChat donation"/><p><small>WeChat Pay</small></p></td>
+      <td width="50%" style="padding: 10px;"><img src="./docs/images/donations/alipay.jpg" width="220" alt="Alipay donation"/><p><small>Alipay</small></p></td>
     </tr>
   </table>
 </div>
 
-本项目采用 [MIT License](./LICENSE) 开源许可证。
+This project is licensed under the [MIT License](./LICENSE).

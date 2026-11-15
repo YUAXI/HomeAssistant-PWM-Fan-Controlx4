@@ -4,6 +4,8 @@
 
 固件里每个 `name` 都会变成 HA 中的一个实体，同时出现在 Web 面板和 REST API 中。本页是完整的实体清单与默认值。
 
+> 本页按**中文版固件**（`firmware/zh/`）的实体名编写，保留 `风扇 1`、`温度 A`、`设备运行时间` 等原始命名。英文版固件（`firmware/en/`，主推）的实体一一对应，只是名字为英文：`Fan 1`、`Fan 1 RPM`、`Temp A`、`Uptime`、`Wi-Fi Signal`、`IP Address`、`Wi-Fi SSID`、`ESPHome Version` 等；`entity_id` 与 REST URL 随之变成英文 slug，规则不变。
+
 ## 命名规则
 
 | 层级 | 示例 |

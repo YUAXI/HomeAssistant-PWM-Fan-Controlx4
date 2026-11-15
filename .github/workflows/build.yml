@@ -12,16 +12,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: v1.0-dual-core
-            path: firmware/v1.0/dual-core/config.yaml
-          - name: v1.0-single-core
-            path: firmware/v1.0/single-core/config.yaml
-          - name: v2.0-basic
-            path: firmware/v2.0/single-core/basic/config.yaml
-          - name: v2.0-ds18b20
-            path: firmware/v2.0/single-core/ds18b20/config.yaml
-          - name: v2.0-ds18b20-radar
-            path: firmware/v2.0/single-core/ds18b20-radar/config.yaml
+          # English builds (primary)
+          - name: v2.0-basic-en
+            path: firmware/en/v2.0/dual-core/basic/config.yaml
+          - name: v2.0-ds18b20-en
+            path: firmware/en/v2.0/dual-core/ds18b20/config.yaml
+          - name: v2.0-ds18b20-radar-en
+            path: firmware/en/v2.0/dual-core/ds18b20-radar/config.yaml
+          # Chinese builds
+          - name: v2.0-basic-zh
+            path: firmware/zh/v2.0/dual-core/basic/config.yaml
+          - name: v2.0-ds18b20-zh
+            path: firmware/zh/v2.0/dual-core/ds18b20/config.yaml
+          - name: v2.0-ds18b20-radar-zh
+            path: firmware/zh/v2.0/dual-core/ds18b20-radar/config.yaml
 
     steps:
       - uses: actions/checkout@v4
@@ -82,6 +86,20 @@ jobs:
         id: date
         run: echo "tag=$(date +'%Y.%-m.%-d')" >> $GITHUB_OUTPUT
 
+      - name: Verify English and Chinese builds are present
+        run: |
+          missing=0
+          for base in v2.0-basic v2.0-ds18b20 v2.0-ds18b20-radar; do
+            for lang in en zh; do
+              if [ ! -f "artifacts/${base}-${lang}.firmware.bin" ]; then
+                echo "::error::missing ${base}-${lang} firmware"
+                missing=1
+              fi
+            done
+          done
+          [ "$missing" -eq 0 ] || exit 1
+          echo "English and Chinese firmware present for all 3 variants."
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -90,19 +108,32 @@ jobs:
           body: |
             ESP32 PWM Fan Controller ${{ steps.date.outputs.tag }}
 
-            **固件版本：**
-            - v1.0-dual-core — 双核版本
-            - v1.0-single-core — 单核版本
-            - v2.0-basic — 基础版本
-            - v2.0-ds18b20 — DS18B20 温度控制版本
-            - v2.0-ds18b20-radar — DS18B20 + 毫米波雷达版本
+            **Dual-core v2.0 firmware.** All controllers sold after 2026-11-12 use
+            the dual-core design, so every v2.0 build is dual-core. The entire v1.0
+            line and the single-core builds are archived under `firmware/*/archive/`
+            and are no longer published here.
 
-            **文件类型说明：**
-            - `.firmware.bin` — 标准固件
-            - `.firmware.factory.bin` — 工厂固件
-            - `.firmware.ota.bin` — OTA 升级固件
+            **Every variant is built in both languages** — English (`-en`, primary)
+            and Chinese (`-zh`) — so each release contains 6 builds × 3 file types =
+            18 files.
 
-            **多台设备：** 同一份固件可直接刷到多台设备，设备名会自动追加本机 MAC 后缀（如 `esp32pwm22810-a1b2c3`），在 Home Assistant 中可分别添加，不会互相覆盖。
+            **Active variants:**
+
+            | Version | English | Chinese |
+            |:--------|:--------|:--------|
+            | v2.0 Basic | `v2.0-basic-en` | `v2.0-basic-zh` |
+            | v2.0 DS18B20 | `v2.0-ds18b20-en` | `v2.0-ds18b20-zh` |
+            | v2.0 DS18B20 + radar | `v2.0-ds18b20-radar-en` | `v2.0-ds18b20-radar-zh` |
+
+            **File types:**
+            - `.firmware.bin` — standard firmware
+            - `.firmware.factory.bin` — factory firmware
+            - `.firmware.ota.bin` — OTA upgrade firmware
+
+            **Multiple devices:** the same binary can be flashed to any number of
+            devices. The device name automatically appends the local MAC suffix
+            (for example `esp32pwm22810-a1b2c3`), so several controllers can be
+            added to Home Assistant side by side without overwriting each other.
           files: artifacts/*
           draft: false
           prerelease: false

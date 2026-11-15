@@ -49,14 +49,19 @@ Additional notes:
 
 ### Choose the firmware first
 
+All controllers sold after **2026-11-12** are **dual-core**, and the active v2.0 firmware is built for dual-core operation, so the default choice is simple:
+
 | Your hardware | Recommended firmware |
 |:---------|:---------|
-| Not sure whether single-core or dual-core | **Any v2.0 firmware** or **v1.0 single-core** (single-core firmware also runs on dual-core chips) |
-| Confirmed dual-core | v1.0 dual-core, or v2.0 |
+| Any board bought after 2026-11-12 (dual-core) | **A v2.0 build** — Basic, DS18B20 or DS18B20 + radar |
 | Need local temperature control | v2.0 DS18B20 |
 | Need human presence detection | v2.0 DS18B20 + radar |
+| v1.0 board (legacy) | The archived v1.0 build under `firmware/en/archive/v1.0/` — compile it yourself ([why](Firmware-EN#archived-builds)) |
+| Older **single-core** board (shipped before 2026-11-12) | The matching **archived single-core** build under `firmware/en/archive/` — compile it yourself ([why](Firmware-EN#archived-builds)) |
 
-For the full comparison see [Firmware versions](Firmware-EN).
+A single-core board cannot boot dual-core firmware, so it must use the archived single-core build; the opposite direction is safe (a dual-core board can run a single-core build, leaving one core idle). The whole v1.0 line is archived too, for v1.0 boards.
+
+Every version comes in two languages: pick the **`-en` build** (English entity names, primary/recommended) unless you need the original Chinese entity names, in which case use the matching `-zh` build. For the full comparison see [Firmware versions](Firmware-EN).
 
 ### Option A: ESPHome Web (simplest, no toolchain needed)
 
@@ -73,30 +78,32 @@ pip install esptool
 
 # first flash: write the factory image at 0x0
 esptool.py --chip esp32 --port COM5 --baud 460800 \
-  write_flash 0x0 v2.0-basic.firmware.factory.bin
+  write_flash 0x0 v2.0-basic-en.firmware.factory.bin
 
 # if you only have the app image (.firmware.bin), the offset is 0x10000
 esptool.py --chip esp32 --port COM5 --baud 460800 \
-  write_flash 0x10000 v2.0-basic.firmware.bin
+  write_flash 0x10000 v2.0-basic-en.firmware.bin
 
 # cannot enter download mode: hold BOOT (IO0), tap RST, then release BOOT
 ```
 
 On Linux / macOS replace `COM5` with `/dev/ttyUSB0` or `/dev/cu.usbserial-*`; if the download fails, drop the baud rate to `115200`.
 
+> `v2.0-basic-en.firmware.*` above is the **active dual-core** build, which fits every controller sold after 2026-11-12. Only if you own an older single-core board do you need a different image — and that one is not downloadable: compile `firmware/en/archive/v2.0/single-core/basic/config.yaml` yourself and flash the resulting `.firmware.factory.bin` (see [Archived single-core builds](Firmware-EN#archived-builds)).
+
 ### Option C: Build and flash with ESPHome (for custom configs)
 
 ```bash
 pip install esphome
-esphome compile firmware/v2.0/single-core/ds18b20/config.yaml
-esphome upload  firmware/v2.0/single-core/ds18b20/config.yaml   # pick the serial port when prompted
+esphome compile firmware/en/v2.0/dual-core/ds18b20/config.yaml
+esphome upload  firmware/en/v2.0/dual-core/ds18b20/config.yaml   # pick the serial port when prompted
 ```
 
 ### Option D: OTA-update a device that is already on the network
 
 ```bash
 # option 1: point the ESPHome CLI at the device address
-esphome upload firmware/v2.0/single-core/ds18b20/config.yaml --device 192.168.1.50
+esphome upload firmware/en/v2.0/dual-core/ds18b20/config.yaml --device 192.168.1.50
 
 # option 2: click INSTALL → Wirelessly in the ESPHome Dashboard
 # option 3: HA → ESPHome integration → device page → three dots → Update (when offered)
@@ -104,7 +111,7 @@ esphome upload firmware/v2.0/single-core/ds18b20/config.yaml --device 192.168.1.
 
 For the OTA target use the device's own IP or `<node name>.local`; the OTA password is `4283bb50a8cd66774ce91d2c9d412cf2`.
 
-> ⚠️ Losing power during an OTA corrupts the application partition and you have to go back to flashing over USB. Before upgrading, make sure the firmware matches the hardware revision.
+> ⚠️ Losing power during an OTA corrupts the application partition and you have to go back to flashing over USB. Before upgrading, make sure the firmware matches the hardware revision: current releases are dual-core only, so a pre-2026-11-12 single-core board needs its archived single-core build flashed over USB.
 
 ## 2.4 Adding it to Home Assistant
 
@@ -122,10 +129,10 @@ For the OTA target use the device's own IP or `<node name>.local`; the OTA passw
 |:---------|:----:|:-----|
 | Fan | 4 | Independent on/off + 1–100% speed control |
 | RPM sensor | 4 | Unit RPM, refreshed every 4 s |
-| Temperature sensor | 4 | DS18B20 / radar firmware only, named 温度 A–D |
+| Temperature sensor | 4 | DS18B20 / radar firmware only, named Temp A–D |
 | Radar entities | 2 | Radar firmware only: presence state + target distance |
 | Bluetooth proxy | 1 | Extends HA Bluetooth coverage |
-| Diagnostic entities | 5 | Uptime, Wi-Fi signal, IP, SSID, ESPHome version |
+| Diagnostic entities | 5 | Uptime, Wi-Fi Signal, IP Address, Wi-Fi SSID, ESPHome Version |
 
 If the device keeps showing up as "Discovered" but adding it fails, the IP is usually wrong or a firewall is blocking it: first open `http://<device IP>/` in a browser to confirm it is reachable.
 
@@ -149,7 +156,7 @@ The same firmware can be flashed to any number of devices: it enables `name_add_
 | Node name | `esp32pwm22810-a1b2c3` |
 | HA device name | `ESP32 PWM 22810 a1b2c3` |
 | mDNS | `esp32pwm22810-a1b2c3.local` |
-| Entity ID | `<domain>.esp32_pwm_22810_a1b2c3_<entity name>` |
+| Entity ID | `<domain>.esp32_pwm_22810_a1b2c3_<slugified entity name>`, e.g. `fan.esp32_pwm_22810_a1b2c3_fan_1` |
 
 The steps are the same as for a single device, just repeat them; multiple devices coexist as separate entries.
 

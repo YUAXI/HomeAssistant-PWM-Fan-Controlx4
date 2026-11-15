@@ -23,7 +23,7 @@
 | 页面 | 内容 |
 |:-----|:-----|
 | [快速上手](Getting-Started) | 开箱检查、供电、首次配网、刷写固件、接入 Home Assistant |
-| [固件版本](Firmware) | 5 个固件的差异、选型决策、Release 产物、自定义编译、多设备命名 |
+| [固件版本](Firmware) | 4 个当前双核固件（中英双版本）与归档单核构建的差异、选型决策、Release 产物、自定义编译、多设备命名 |
 | [实体参考](Entities) | 全部实体清单（风扇 / 转速 / 温度 / 参数 / 诊断）与默认值、取值范围 |
 | [温度控制](Temperature-Control) | DS18B20 接线、1-Wire 索引、线性调速算法、参数调优、异常行为 |
 | [毫米波雷达](Radar) | LD2402G 接线与串口协议、抗干扰算法、距离门限调参、联动示例 |
@@ -38,7 +38,7 @@
 ## 一分钟上手
 
 ```text
-1. 确认硬件版本（单核 / 双核）→ 下载对应 Release 固件
+1. 2026-11-12 之后购买的成品都是双核 → 下载当前双核 Release 固件（-en 英文主推 / -zh 中文）；更早的单核老设备要用归档单核构建（见下方「版本速查」）
 2. Type-C 连电脑，用 ESPHome Web 或 esptool 刷 .factory.bin
 3. 手机连热点 ESP32-Fan-22810 → 打开 http://192.168.4.1 配网
 4. 浏览器打开 http://<设备IP> 即可控制；HA 中添加 ESPHome 集成并填入 API 加密密钥
@@ -52,15 +52,17 @@ LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk=
 
 ## 版本速查
 
-| 固件 | 处理器 | 温度 | 雷达 | 配置文件 |
-|:-----|:------:|:----:|:----:|:---------|
-| v1.0 双核 | 双核 | - | - | `firmware/v1.0/dual-core/config.yaml` |
-| v1.0 单核 | 单核 | - | - | `firmware/v1.0/single-core/config.yaml` |
-| v2.0 Basic | 单核 | - | - | `firmware/v2.0/single-core/basic/config.yaml` |
-| v2.0 DS18B20 | 单核 | ✅ | - | `firmware/v2.0/single-core/ds18b20/config.yaml` |
-| v2.0 DS18B20+雷达 | 单核 | ✅ | ✅ | `firmware/v2.0/single-core/ds18b20-radar/config.yaml` |
+每个版本都有中英两套固件：英文版在 `firmware/en/`（**主要推荐**，实体名为 `Fan 1`、`Temp A`、`Uptime`…），中文版在 `firmware/zh/`（实体名为 `风扇 1`、`温度 A`、`设备运行时间`…）。两者引脚、逻辑、节点名完全一致，只有实体名不同；把下表路径中的 `zh/` 换成 `en/` 即得到英文版配置。
 
-> ⚠️ **成品设备通常是单核设计，只能刷 `v1.0 单核` 或任意 `v2.0` 固件。刷入 `v1.0 双核` 固件会导致设备无法启动。**
+| 固件 | 处理器 | 温度 | 雷达 | 配置文件（中文版） | Release 产物 |
+|:-----|:------:|:----:|:----:|:---------|:-------------|
+| v2.0 Basic | 双核 | - | - | `firmware/zh/v2.0/dual-core/basic/config.yaml` | `v2.0-basic-en` / `v2.0-basic-zh` |
+| v2.0 DS18B20 | 双核 | ✅ | - | `firmware/zh/v2.0/dual-core/ds18b20/config.yaml` | `v2.0-ds18b20-en` / `v2.0-ds18b20-zh` |
+| v2.0 DS18B20+雷达 | 双核 | ✅ | ✅ | `firmware/zh/v2.0/dual-core/ds18b20-radar/config.yaml` | `v2.0-ds18b20-radar-en` / `v2.0-ds18b20-radar-zh` |
+
+> ⚠️ **2026-11-12 之后售卖的成品全部是双核，当前固件为双核 v2.0。** 直接刷上表任一版本即可。
+>
+> **整个 v1.0 系列**与早于该日期出货的**单核板**都使用 `firmware/zh/archive/` 下的归档构建自行编译（`archive/v1.0/{dual-core,single-core}/`、`archive/v2.0/single-core/{basic,ds18b20,ds18b20-radar}/`）；这些归档构建**不再进入 CI 与 Release**。单核板无法启动双核固件；双核板也可以运行归档单核固件，只是闲置一个核心。详见 [固件版本](Firmware#归档的构建)。
 
 ## 关键参数
 
@@ -77,7 +79,7 @@ LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk=
 ## 相关链接
 
 - [GitHub Releases（预编译固件）](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/releases)
-- [中文 README](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/readme.md) · [English README](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/README_EN.md)
+- [English README（仓库主文档）](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/readme.md) · [中文 README](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/README_ZH.md)
 - [ESPHome 官方文档](https://esphome.io/)
 - [Home Assistant ESPHome 集成](https://www.home-assistant.io/integrations/esphome/)
 

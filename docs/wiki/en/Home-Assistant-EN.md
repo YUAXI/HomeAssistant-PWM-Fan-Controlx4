@@ -14,13 +14,15 @@
 
 4. When it finishes, the device page shows fans, sensors, parameter controls and diagnostic entities.
 
+> The entity names used in this page are those of the English build (`-en`, primary). The Chinese build (`-zh`) exposes the same entities under the original Chinese names.
+
 > If you rename the device or change the key in HA and then reconnect, the old entry reports an authentication failure: delete that ESPHome entry and add it again (history stays in the recorder database, so nothing is lost).
 
 ![Device page and diagnostics](https://raw.githubusercontent.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/master/docs/images/screenshots/ha02.png)
 
 ## Suggested entity tidy-up
 
-The Chinese names in the firmware directly determine the shape of the `entity_id` (e.g. `fan.esp32_pwm_22810_a1b2c3_风扇_1`). There are two ways to tidy up:
+The entity names in the firmware directly determine the shape of the `entity_id` (e.g. `fan.esp32_pwm_22810_a1b2c3_fan_1` in the English firmware; the Chinese edition produces IDs containing Chinese characters). There are two ways to tidy up:
 
 | Approach | What you do | Impact |
 |:-----|:-----|:-----|
@@ -31,9 +33,9 @@ Suggested convention inside HA:
 
 | Entity | Suggested entity_id |
 |:-----|:---------------|
-| 风扇 1–4 | `fan.rack_fan_1` … `fan.rack_fan_4` |
+| Fan 1–4 | `fan.rack_fan_1` … `fan.rack_fan_4` |
 | Speed | `sensor.rack_fan_1_rpm` … |
-| 温度 A–D | `sensor.rack_temp_a` … |
+| Temp A–D | `sensor.rack_temp_a` … |
 | Temperature parameters | `number.rack_fan_1_t_min` … |
 | Radar | `binary_sensor.rack_presence` / `sensor.rack_presence_dist` |
 
@@ -45,7 +47,7 @@ Suggested convention inside HA:
 
 ```yaml
 type: entities
-title: 机柜风扇
+title: Rack fans
 entities:
   - entity: fan.fan_1
   - entity: sensor.fan_1_rpm
@@ -61,12 +63,12 @@ entities:
 
 ```yaml
 type: entities
-title: 风扇 1 温控
+title: Fan 1 temperature control
 state_color: true
 entities:
   - entity: select.fan_1_source
   - type: section
-    label: 温度曲线
+    label: Temperature curve
   - entity: number.fan_1_t_min
   - entity: number.fan_1_t_max
   - entity: number.fan_1_f_min
@@ -77,7 +79,7 @@ entities:
 
 ```yaml
 type: history-graph
-title: 温度 vs 转速
+title: Temperature vs RPM
 hours_to_show: 12
 entities:
   - entity: sensor.temp_a
@@ -89,7 +91,7 @@ entities:
 ```yaml
 type: gauge
 entity: sensor.fan_1_rpm
-name: 风扇 1
+name: Fan 1
 min: 0
 max: 2000
 severity:
@@ -107,7 +109,7 @@ severity:
 Useful for `v1.0`, or when you want to set the speed from a HA-side sensor such as CPU temperature or a Synology drive temperature. `v2.0 DS18B20` already has a built-in local closed loop, so prefer the local one (see [temperature control](Temperature-Control-EN)).
 
 ```yaml
-alias: "风扇 1：按 CPU 温度线性调速"
+alias: "Fan 1: linear speed from CPU temperature"
 mode: restart
 trigger:
   - platform: state
@@ -144,7 +146,7 @@ Key points:
 ### 2. Overheat protection (independent of the temperature-control logic)
 
 ```yaml
-alias: "风扇：过热全速并告警"
+alias: "Fans: full speed and an alert on overheat"
 trigger:
   - platform: numeric_state
     entity_id: sensor.temp_a
@@ -156,8 +158,8 @@ action:
     data: { percentage: 100 }
   - service: notify.persistent_notification
     data:
-      title: "机柜过热"
-      message: "温度 A 已到 {{ states('sensor.temp_a') }}°C，风扇 1 已强制全速。"
+      title: "Rack overheat"
+      message: "Temp A reached {{ states('sensor.temp_a') }}°C; Fan 1 forced to full speed."
 ```
 
 ### 3. Abnormal RPM alert
@@ -165,7 +167,7 @@ action:
 When a fan loses power or seizes, its RPM drops to 0, which makes a good failure detector:
 
 ```yaml
-alias: "风扇 1 转速异常"
+alias: "Fan 1 RPM abnormal"
 trigger:
   - platform: state
     entity_id: sensor.fan_1_rpm
@@ -178,8 +180,8 @@ condition:
 action:
   - service: notify.persistent_notification
     data:
-      title: "风扇 1 停转"
-      message: "风扇 1 处于开启状态但转速为 0，请检查接线或风扇。"
+      title: "Fan 1 stalled"
+      message: "Fan 1 is on but its RPM is 0; check the wiring or the fan."
 ```
 
 ### 4. Night-time quiet mode (change the parameters, not the fan)
@@ -187,7 +189,7 @@ action:
 If that channel has a temperature source bound, do not write the fan speed directly (the local closed loop overrides it after 5 seconds) — change the parameters instead:
 
 ```yaml
-alias: "夜间降低风扇上限"
+alias: "Lower the fan ceiling at night"
 trigger:
   - platform: time
     at: "23:00:00"
@@ -206,7 +208,7 @@ For presence-detection automation templates, see [mmWave radar](Radar-EN#linkage
 ```yaml
 script:
   rack_fans_on:
-    alias: "机柜风扇全开"
+    alias: "Rack fans on"
     sequence:
       - repeat:
           for_each:
@@ -220,7 +222,7 @@ script:
               data: { percentage: 100 }
 
   rack_fans_off:
-    alias: "机柜风扇全关"
+    alias: "Rack fans off"
     sequence:
       - service: fan.turn_off
         target:
@@ -231,7 +233,7 @@ script:
             - fan.fan_4
 ```
 
-> Before turning everything off, remember to set the temperature source of all 4 `select` entities to `未绑定` (unbound); otherwise the local closed loop turns them back on after 5 seconds.
+> Before turning everything off, remember to set the temperature source of all 4 `select` entities to `Unbound`; otherwise the local closed loop turns them back on after 5 seconds.
 
 ## Bluetooth proxy (BLE Proxy)
 
@@ -251,11 +253,11 @@ Notes:
 
 | Entity | Purpose |
 |:-----|:-----|
-| 设备运行时间 | Tells you whether the device rebooted unexpectedly (an unexpected reset to zero = power loss/crash) |
-| Wi-Fi 信号强度 | Better than −70 dBm is recommended; below −80 dBm packet loss becomes likely |
-| 设备 IP 地址 | Check it when you reserve addresses in DHCP |
-| 连接 Wi-Fi SSID | Confirms which network it joined in multi-SSID environments |
-| ESPHome 版本 | Tells you whether an upgrade is needed and whether CI has updated |
+| Uptime | Tells you whether the device rebooted unexpectedly (an unexpected reset to zero = power loss/crash) |
+| Wi-Fi Signal | Better than −70 dBm is recommended; below −80 dBm packet loss becomes likely |
+| IP Address | Check it when you reserve addresses in DHCP |
+| Wi-Fi SSID | Confirms which network it joined in multi-SSID environments |
+| ESPHome Version | Tells you whether an upgrade is needed and whether CI has updated |
 
 ## Common HA-side issues
 
@@ -264,5 +266,5 @@ Notes:
 | Integration shows "Unable to connect" | Open `http://<IP>/` in a browser first to confirm the device is online; check firewall/VLAN isolation |
 | All entities `unavailable` | The device rebooted or dropped off the network; check whether the uptime reset to zero |
 | Entities appear twice (`_2`) | The device was once paired with identically named firmware; delete the old device entry and add it again |
-| Automation sets the speed but it reverts after 5 seconds | That channel has a temperature source bound: set the `select` to `未绑定` (unbound), or change the parameters instead of the fan |
+| Automation sets the speed but it reverts after 5 seconds | That channel has a temperature source bound: set the `select` to `Unbound`, or change the parameters instead of the fan |
 | History graphs are sluggish | Reduce the number of entities included in the recorder or lower the sampling frequency |

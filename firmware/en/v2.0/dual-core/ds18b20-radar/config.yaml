@@ -1,0 +1,641 @@
+esphome:
+  name: esp32pwm22810
+  # Append the local MAC suffix so the same firmware flashed to several devices
+  # gets a unique name (for example esp32pwm22810-a1b2c3).
+  name_add_mac_suffix: true
+  friendly_name: ESP32 PWM 22810
+  # Boot sequence: activate the LD2402G radar
+  on_boot:
+    priority: -100
+    then:
+      - logger.log: "Sending activation command to LD2402G..."
+      - uart.write: [0x55, 0x5A, 0x02, 0x01, 0xAA]
+      - delay: 200ms
+      - uart.write: [0x55, 0x01, 0x01, 0x00, 0xAA]
+
+esp32:
+  board: esp32dev
+  variant: ESP32
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      # Dual-core build: FreeRTOS keeps scheduling both cores. All controllers
+      # sold after 2026-11-12 use the dual-core design.
+      CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT: "y"
+
+logger:
+  level: INFO
+
+api:
+  encryption:
+    key: "LqGIGJ3qyRc+6X6hsMe5vAms+Jyh2lOMh1FQu8yyuzk="
+
+ota:
+  - platform: esphome
+    password: "4283bb50a8cd66774ce91d2c9d412cf2"
+
+wifi:
+  ap:
+    ssid: "ESP32-Fan-22810"
+    password: ""
+
+captive_portal:
+
+esp32_ble_tracker:
+
+bluetooth_proxy:
+  active: true
+
+web_server:
+  port: 80
+
+# ==========================================
+# 24 GHz mmWave radar UART and anti-interference parsing
+# ==========================================
+uart:
+  - id: radar_uart
+    tx_pin: GPIO5
+    rx_pin: GPIO4
+    baud_rate: 115200
+    debug:
+      direction: RX
+      dummy_receiver: true
+      sequence:
+        - lambda: |-
+            static std::string line_buffer = "";
+            static float last_dist = -1.0f;
+            static uint32_t last_change_time = 0;
+
+            for (auto val : bytes) {
+              if (val == 0x0A) { // End of line
+                int dist_cm = -1;
+                if (sscanf(line_buffer.c_str(), "distance:%d", &dist_cm) == 1) {
+                  float current_m = dist_cm / 100.0f;
+
+                  // Distance window configured from Home Assistant (metres)
+                  float min_limit = id(radar_min_dist).state;
+                  float max_limit = id(radar_max_dist).state;
+
+                  // Anti-interference rule 1: stay inside the configured window
+                  if (current_m < min_limit || current_m > max_limit) {
+                    id(radar_target).publish_state(false);
+                    id(radar_dist).publish_state(NAN);
+                  }
+                  else {
+                    // Anti-interference rule 2: reject static / frozen readings
+                    if (std::abs(current_m - last_dist) > 0.01f) {
+                      last_dist = current_m;
+                      last_change_time = millis();
+                    }
+
+                    // A reading frozen inside the window for more than 5 seconds
+                    // is treated as a fixed false target (e.g. a static reflector)
+                    if (millis() - last_change_time > 5000) {
+                      id(radar_target).publish_state(false);
+                      id(radar_dist).publish_state(NAN);
+                    } else {
+                      // Valid moving target
+                      id(radar_target).publish_state(true);
+                      id(radar_dist).publish_state(current_m);
+                    }
+                  }
+                }
+                line_buffer.clear();
+              } else if (val != 0x0D) {
+                line_buffer += (char)val;
+              }
+            }
+
+# 1-Wire bus for the DS18B20 temperature sensors
+one_wire:
+  - platform: gpio
+    pin: GPIO14
+
+output:
+  - platform: ledc
+    pin: GPIO16
+    id: fan1_pwm
+    frequency: 25000Hz
+  - platform: ledc
+    pin: GPIO17
+    id: fan2_pwm
+    frequency: 25000Hz
+  - platform: ledc
+    pin: GPIO18
+    id: fan3_pwm
+    frequency: 25000Hz
+  - platform: ledc
+    pin: GPIO19
+    id: fan4_pwm
+    frequency: 25000Hz
+
+switch:
+  - platform: gpio
+    pin: GPIO21
+    id: fan1_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: GPIO22
+    id: fan2_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: GPIO23
+    id: fan3_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    pin: GPIO13
+    id: fan4_pwr
+    internal: true
+    restore_mode: ALWAYS_OFF
+
+# ==========================================
+# Temperature source mapping for each fan
+# ==========================================
+select:
+  - platform: template
+    name: "Fan 1 Temp Source F1-Src"
+    id: f1_source
+    optimistic: true
+    options:
+      - "Unbound"
+      - "Temp A"
+      - "Temp B"
+      - "Temp C"
+      - "Temp D"
+    initial_option: "Temp A"
+    restore_value: true
+
+  - platform: template
+    name: "Fan 2 Temp Source F2-Src"
+    id: f2_source
+    optimistic: true
+    options:
+      - "Unbound"
+      - "Temp A"
+      - "Temp B"
+      - "Temp C"
+      - "Temp D"
+    initial_option: "Temp B"
+    restore_value: true
+
+  - platform: template
+    name: "Fan 3 Temp Source F3-Src"
+    id: f3_source
+    optimistic: true
+    options:
+      - "Unbound"
+      - "Temp A"
+      - "Temp B"
+      - "Temp C"
+      - "Temp D"
+    initial_option: "Temp C"
+    restore_value: true
+
+  - platform: template
+    name: "Fan 4 Temp Source F4-Src"
+    id: f4_source
+    optimistic: true
+    options:
+      - "Unbound"
+      - "Temp A"
+      - "Temp B"
+      - "Temp C"
+      - "Temp D"
+    initial_option: "Temp D"
+    restore_value: true
+
+# ==========================================
+# Fan parameters plus the radar distance window
+# ==========================================
+number:
+  # ------ Radar distance filters ------
+  - platform: template
+    name: "Radar Min Distance"
+    id: radar_min_dist
+    optimistic: true
+    min_value: 0.0
+    max_value: 2.0
+    step: 0.05
+    unit_of_measurement: "m"
+    initial_value: 0.10
+    restore_value: true
+
+  - platform: template
+    name: "Radar Max Distance"
+    id: radar_max_dist
+    optimistic: true
+    min_value: 0.5
+    max_value: 8.0
+    step: 0.1
+    unit_of_measurement: "m"
+    initial_value: 1.5
+    restore_value: true
+
+  # ------ Fan 1 parameters ------
+  - platform: template
+    name: "Fan 1 Start Temp T-Min"
+    id: f1_t_min
+    optimistic: true
+    min_value: 10
+    max_value: 60
+    step: 1
+    initial_value: 30
+    restore_value: true
+  - platform: template
+    name: "Fan 1 Full Speed Temp T-Max"
+    id: f1_t_max
+    optimistic: true
+    min_value: 40
+    max_value: 90
+    step: 1
+    initial_value: 50
+    restore_value: true
+  - platform: template
+    name: "Fan 1 Min Speed F-Min"
+    id: f1_f_min
+    optimistic: true
+    min_value: 0
+    max_value: 50
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 0
+    restore_value: true
+  - platform: template
+    name: "Fan 1 Max Speed F-Max"
+    id: f1_f_max
+    optimistic: true
+    min_value: 50
+    max_value: 100
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 100
+    restore_value: true
+
+  # ------ Fan 2 parameters ------
+  - platform: template
+    name: "Fan 2 Start Temp T-Min"
+    id: f2_t_min
+    optimistic: true
+    min_value: 10
+    max_value: 60
+    step: 1
+    initial_value: 30
+    restore_value: true
+  - platform: template
+    name: "Fan 2 Full Speed Temp T-Max"
+    id: f2_t_max
+    optimistic: true
+    min_value: 40
+    max_value: 90
+    step: 1
+    initial_value: 50
+    restore_value: true
+  - platform: template
+    name: "Fan 2 Min Speed F-Min"
+    id: f2_f_min
+    optimistic: true
+    min_value: 0
+    max_value: 50
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 0
+    restore_value: true
+  - platform: template
+    name: "Fan 2 Max Speed F-Max"
+    id: f2_f_max
+    optimistic: true
+    min_value: 50
+    max_value: 100
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 100
+    restore_value: true
+
+  # ------ Fan 3 parameters ------
+  - platform: template
+    name: "Fan 3 Start Temp T-Min"
+    id: f3_t_min
+    optimistic: true
+    min_value: 10
+    max_value: 60
+    step: 1
+    initial_value: 30
+    restore_value: true
+  - platform: template
+    name: "Fan 3 Full Speed Temp T-Max"
+    id: f3_t_max
+    optimistic: true
+    min_value: 40
+    max_value: 90
+    step: 1
+    initial_value: 50
+    restore_value: true
+  - platform: template
+    name: "Fan 3 Min Speed F-Min"
+    id: f3_f_min
+    optimistic: true
+    min_value: 0
+    max_value: 50
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 0
+    restore_value: true
+  - platform: template
+    name: "Fan 3 Max Speed F-Max"
+    id: f3_f_max
+    optimistic: true
+    min_value: 50
+    max_value: 100
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 100
+    restore_value: true
+
+  # ------ Fan 4 parameters ------
+  - platform: template
+    name: "Fan 4 Start Temp T-Min"
+    id: f4_t_min
+    optimistic: true
+    min_value: 10
+    max_value: 60
+    step: 1
+    initial_value: 30
+    restore_value: true
+  - platform: template
+    name: "Fan 4 Full Speed Temp T-Max"
+    id: f4_t_max
+    optimistic: true
+    min_value: 40
+    max_value: 90
+    step: 1
+    initial_value: 50
+    restore_value: true
+  - platform: template
+    name: "Fan 4 Min Speed F-Min"
+    id: f4_f_min
+    optimistic: true
+    min_value: 0
+    max_value: 50
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 0
+    restore_value: true
+  - platform: template
+    name: "Fan 4 Max Speed F-Max"
+    id: f4_f_max
+    optimistic: true
+    min_value: 50
+    max_value: 100
+    step: 1
+    unit_of_measurement: "%"
+    initial_value: 100
+    restore_value: true
+
+# ==========================================
+# Periodic speed-control core logic
+# ==========================================
+interval:
+  - interval: 5s
+    then:
+      - lambda: |-
+          auto get_temp_by_source = [](std::string source) -> float {
+            if (source == "Temp A") return id(temp_a).state;
+            if (source == "Temp B") return id(temp_b).state;
+            if (source == "Temp C") return id(temp_c).state;
+            if (source == "Temp D") return id(temp_d).state;
+            return NAN;
+          };
+
+          auto calculate_speed = [](float current_t, float t_min, float t_max, float f_min, float f_max) -> int {
+            if (std::isnan(current_t)) return -1; // Sensor failure: keep the current speed
+            if (current_t <= t_min) return -2;    // Below the start temperature: cut the power
+            if (current_t >= t_max) return (int)f_max;
+            float pct = ((current_t - t_min) * (f_max - f_min) / (t_max - t_min) + f_min);
+            return (int)roundf(pct);
+          };
+
+          std::string s1 = id(f1_source).current_option();
+          if (s1 != "Unbound") {
+            float t1 = get_temp_by_source(s1);
+            int v1 = calculate_speed(t1, id(f1_t_min).state, id(f1_t_max).state, id(f1_f_min).state, id(f1_f_max).state);
+            if (v1 == -2) {
+              id(my_fan1).make_call().set_state(false).perform();
+            } else if (v1 >= 0) {
+              id(my_fan1).make_call().set_state(true).perform();
+              id(my_fan1).make_call().set_speed(v1).perform();
+            }
+          }
+
+          std::string s2 = id(f2_source).current_option();
+          if (s2 != "Unbound") {
+            float t2 = get_temp_by_source(s2);
+            int v2 = calculate_speed(t2, id(f2_t_min).state, id(f2_t_max).state, id(f2_f_min).state, id(f2_f_max).state);
+            if (v2 == -2) {
+              id(my_fan2).make_call().set_state(false).perform();
+            } else if (v2 >= 0) {
+              id(my_fan2).make_call().set_state(true).perform();
+              id(my_fan2).make_call().set_speed(v2).perform();
+            }
+          }
+
+          std::string s3 = id(f3_source).current_option();
+          if (s3 != "Unbound") {
+            float t3 = get_temp_by_source(s3);
+            int v3 = calculate_speed(t3, id(f3_t_min).state, id(f3_t_max).state, id(f3_f_min).state, id(f3_f_max).state);
+            if (v3 == -2) {
+              id(my_fan3).make_call().set_state(false).perform();
+            } else if (v3 >= 0) {
+              id(my_fan3).make_call().set_state(true).perform();
+              id(my_fan3).make_call().set_speed(v3).perform();
+            }
+          }
+
+          std::string s4 = id(f4_source).current_option();
+          if (s4 != "Unbound") {
+            float t4 = get_temp_by_source(s4);
+            int v4 = calculate_speed(t4, id(f4_t_min).state, id(f4_t_max).state, id(f4_f_min).state, id(f4_f_max).state);
+            if (v4 == -2) {
+              id(my_fan4).make_call().set_state(false).perform();
+            } else if (v4 >= 0) {
+              id(my_fan4).make_call().set_state(true).perform();
+              id(my_fan4).make_call().set_speed(v4).perform();
+            }
+          }
+
+# ==========================================
+# Virtual radar presence entity
+# ==========================================
+binary_sensor:
+  - platform: template
+    name: "Radar Target Detected"
+    id: radar_target
+
+# ==========================================
+# Sensors
+# ==========================================
+sensor:
+  # Four temperature sensors
+  - platform: dallas_temp
+    index: 0
+    name: "Temp A"
+    id: temp_a
+    update_interval: 5s
+
+  - platform: dallas_temp
+    index: 1
+    name: "Temp B"
+    id: temp_b
+    update_interval: 5s
+
+  - platform: dallas_temp
+    index: 2
+    name: "Temp C"
+    id: temp_c
+    update_interval: 5s
+
+  - platform: dallas_temp
+    index: 3
+    name: "Temp D"
+    id: temp_d
+    update_interval: 5s
+
+  # Four fan tachometer inputs
+  - platform: pulse_counter
+    pin:
+      number: GPIO32
+      mode: INPUT
+    name: "Fan 1 RPM"
+    id: fan1_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO33
+      mode: INPUT
+    name: "Fan 2 RPM"
+    id: fan2_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO25
+      mode: INPUT
+    name: "Fan 3 RPM"
+    id: fan3_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO26
+      mode: INPUT
+    name: "Fan 4 RPM"
+    id: fan4_rpm
+    unit_of_measurement: "RPM"
+    update_interval: 4s
+    count_mode: {rising_edge: DISABLE, falling_edge: INCREMENT}
+    internal_filter: 13us
+    filters:
+      - multiply: 0.5
+
+  # Virtual radar target distance
+  - platform: template
+    name: "Radar Distance"
+    id: radar_dist
+    unit_of_measurement: "m"
+    icon: "mdi:ruler"
+
+  - platform: uptime
+    name: "Uptime"
+    entity_category: "diagnostic"
+    id: uptime_sensor
+    update_interval: 60s
+
+  - platform: wifi_signal
+    name: "Wi-Fi Signal"
+    entity_category: "diagnostic"
+    id: wifi_rssi
+    update_interval: 60s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+      entity_category: "diagnostic"
+    ssid:
+      name: "Wi-Fi SSID"
+      entity_category: "diagnostic"
+
+  - platform: version
+    name: "ESPHome Version"
+    entity_category: "diagnostic"
+
+fan:
+  - platform: speed
+    output: fan1_pwm
+    name: "Fan 1"
+    id: my_fan1
+    speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - then:
+          - switch.turn_on: fan1_pwr
+    on_turn_off:
+      - then:
+          - switch.turn_off: fan1_pwr
+
+  - platform: speed
+    output: fan2_pwm
+    name: "Fan 2"
+    id: my_fan2
+    speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - then:
+          - switch.turn_on: fan2_pwr
+    on_turn_off:
+      - then:
+          - switch.turn_off: fan2_pwr
+
+  - platform: speed
+    output: fan3_pwm
+    name: "Fan 3"
+    id: my_fan3
+    speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - then:
+          - switch.turn_on: fan3_pwr
+    on_turn_off:
+      - then:
+          - switch.turn_off: fan3_pwr
+
+  - platform: speed
+    output: fan4_pwm
+    name: "Fan 4"
+    id: my_fan4
+    speed_count: 100
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - then:
+          - switch.turn_on: fan4_pwr
+    on_turn_off:
+      - then:
+          - switch.turn_off: fan4_pwr

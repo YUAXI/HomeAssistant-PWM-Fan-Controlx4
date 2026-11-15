@@ -2,7 +2,7 @@
 
 [← 首页](Home) · **中文** · [English](Temperature-Control-EN)
 
-适用于 `v2.0-ds18b20` 与 `v2.0-ds18b20-radar` 固件。温度闭环在**设备本地**运行，不依赖 Home Assistant：断网、HA 维护期间依然有效。
+适用于 `v2.0-ds18b20` 与 `v2.0-ds18b20-radar` 固件（Release 产物分别为 `v2.0-ds18b20-en` / `-zh` 与 `v2.0-ds18b20-radar-en` / `-zh`）。温度闭环在**设备本地**运行，不依赖 Home Assistant：断网、HA 维护期间依然有效。
 
 ## 接线
 

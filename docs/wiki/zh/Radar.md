@@ -2,7 +2,7 @@
 
 [← 首页](Home) · **中文** · [English](Radar-EN)
 
-仅 `v2.0-ds18b20-radar` 固件启用。雷达用于**人体存在检测**，并把「有人 / 距离」两个实体交给 Home Assistant，由你做联动。
+仅 `v2.0-ds18b20-radar` 固件启用（Release 产物 `v2.0-ds18b20-radar-en` / `v2.0-ds18b20-radar-zh`）。雷达用于**人体存在检测**，并把「有人 / 距离」两个实体交给 Home Assistant，由你做联动。
 
 ## 接线
 

@@ -1,0 +1,19 @@
+# ESPHome build directories and local build output
+**/.esphome/
+dist/
+build/
+
+# ESPHome regenerates a per-config .gitignore; the rules above already cover it
+firmware/**/.gitignore
+
+# ESPHome secrets
+secrets.yaml
+**/secrets.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+
+# OS / editor
+.DS_Store
+Thumbs.db

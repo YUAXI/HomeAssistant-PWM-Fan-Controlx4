@@ -2,6 +2,8 @@
 
 [← 首页](Home) · **中文** · [English](Home-Assistant-EN)
 
+> 本页示例基于中文版固件（`firmware/zh/`）的实体名。英文版固件（`firmware/en/`，主推）的实体名是 `Fan 1`、`Fan 1 RPM`、`Temp A`、`Uptime` 等，`entity_id` 形如 `fan.esp32_pwm_22810_a1b2c3_fan_1`；下面的模板把实体 ID 换成英文版对应实体即可。
+
 ## 添加设备
 
 1. **设置 → 设备与服务 → 添加集成 → ESPHome**。

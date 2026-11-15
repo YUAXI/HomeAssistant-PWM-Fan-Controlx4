@@ -2,7 +2,7 @@
 
 [← Home](Home-EN) · [中文](Temperature-Control) · **English**
 
-Applies to the `v2.0-ds18b20` and `v2.0-ds18b20-radar` firmware. The temperature closed loop runs **on the device itself** and does not depend on Home Assistant: it keeps working with the network down or while HA is under maintenance.
+Applies to the `v2.0-ds18b20` and `v2.0-ds18b20-radar` variants (both the `-en` and `-zh` builds; this page uses the English entity names). Both are **active dual-core** builds (`firmware/en/v2.0/dual-core/...`); the archived single-core twins under `firmware/en/archive/v2.0/single-core/` behave exactly the same — see [Firmware versions](Firmware-EN#archived-builds). The temperature closed loop runs **on the device itself** and does not depend on Home Assistant: it keeps working with the network down or while HA is under maintenance.
 
 ## Wiring
 
@@ -16,7 +16,7 @@ The DS18B20 connects to the on-board **GPIO14** 1-Wire bus (v2.0 provides a 3PIN
 
 Key points:
 
-- Up to **4** probes can share the bus; the firmware names them by index as **温度 A / B / C / D** (temperature A/B/C/D).
+- Up to **4** probes can share the bus; the firmware names them by index as **Temp A / B / C / D**.
 - For long cables (>1 m) or bare TO-92 probes, add a **4.7kΩ pull-up** between DATA and 3.3V; occasional `nan` readings are almost always a pull-up or contact problem.
 - The bus is 3.3V logic, so even when a probe is powered from 5V its data line can still go straight to GPIO14 (the DS18B20 data pin is open-drain).
 - Do not hot-plug: plugging or unplugging a probe while powered creates bus glitches that can briefly knock the other probes offline.
@@ -29,7 +29,7 @@ The firmware works with **indexes**, not fixed addresses:
 sensor:
   - platform: dallas_temp
     index: 0        # → temperature A
-    name: "温度 A"
+    name: "Temp A"
   - platform: dallas_temp
     index: 1        # → temperature B
     ...
@@ -52,7 +52,7 @@ Ways around it:
 sensor:
   - platform: dallas_temp
     address: 0x3C0000000A1B2C3D    # replace with the address of your probe
-    name: "温度 A"
+    name: "Temp A"
     update_interval: 5s
 ```
 
@@ -60,15 +60,15 @@ To find an address: set `logger.level` to `DEBUG` and the serial log prints the 
 
 ## Parameters
 
-Each fan has one temperature-source binding plus 4 control parameters, adjustable straight from the HA device page / Web panel and retained across power loss:
+Each fan has one temperature-source binding plus 4 control parameters, adjustable straight from the HA device page / Web panel and retained across power loss. In the English firmware they are named `Fan N Temp Source FN-Src`, `Fan N Start Temp T-Min`, `Fan N Full Speed Temp T-Max`, `Fan N Min Speed F-Min` and `Fan N Max Speed F-Max` (`N` = 1–4):
 
 | Parameter | Function | Range | Default |
 |:-----|:-----|:-----|:----:|
-| `FN-Src` 温度源绑定 | Select 未绑定 (unbound) or one of 温度 A/B/C/D | — | 风扇 1–4 → A–D |
-| `T-Min` 启控温度 | At or below this temperature the fan is powered off and stops | 10–60 °C | 30 °C |
-| `T-Max` 满载温度 | At or above this temperature the fan runs at `F-Max` | 40–90 °C | 50 °C |
-| `F-Min` 最低风速 | Lowest speed in the linear range | 0–50 % | 0 % |
-| `F-Max` 最高风速 | Highest speed in the linear range | 50–100 % | 100 % |
+| `FN-Src` temp source | Select `Unbound` or one of Temp A/B/C/D | — | Fan 1–4 → Temp A–D |
+| `T-Min` start temperature | At or below this temperature the fan is powered off and stops | 10–60 °C | 30 °C |
+| `T-Max` full-speed temperature | At or above this temperature the fan runs at `F-Max` | 40–90 °C | 50 °C |
+| `F-Min` min speed | Lowest speed in the linear range | 0–50 % | 0 % |
+| `F-Max` max speed | Highest speed in the linear range | 50–100 % | 100 % |
 
 > The firmware does **not validate** the relationship between `T-Min` and `T-Max`. If you set `T-Min` above `T-Max`, the temperature hits the "≤ T-Min → stop" branch first and the fan **never spins**. Always keep `T-Min < T-Max`.
 
@@ -99,7 +99,7 @@ auto calculate_speed = [](float current_t, float t_min, float t_max, float f_min
 
 Full behaviour table:
 
-| Temperature | Source = 未绑定 | Source bound, reading valid | Source bound, reading `nan` |
+| Temperature | Source = Unbound | Source bound, reading valid | Source bound, reading `nan` |
 |:-----|:-------------|:----------------------|:---------------------------|
 | ≤ T-Min | No intervention | Powered off, stopped | Keep current state |
 | Middle range | No intervention | Linear speed control | Keep current state |
@@ -117,7 +117,7 @@ Set `F-Min` to the smallest duty cycle at which that fan **starts reliably** (20
 
 > **Once a temperature source is bound, the local closed loop overwrites the fan state every 5 seconds.** A speed set by hand in HA / Web / the API is reverted 5 seconds later.
 
-To control a fan manually, set its `FN-Src` to **未绑定** (unbound). This is the most common switch besides the default behaviour.
+To control a fan manually, set its `FN-Src` to **Unbound**. This is the most common switch besides the default behaviour.
 
 ## Tuning examples
 
@@ -142,7 +142,7 @@ Tuning tips:
 | Temperature shows `unknown` | Is the probe on GPIO14, is there a 4.7k pull-up, are all 4 probes online |
 | Temperature is fine but the fan does not move | Is `FN-Src` bound to the right temperature, is `T-Min` above the current temperature, is `F-Min` 0 |
 | Fan speed jumps around | `F-Min` too low, causing repeated start/stop; raise `F-Min` above the start-up threshold |
-| Temperature A–D do not match | Index order changed; switch to a fixed `address` |
+| `Temp A`–`Temp D` do not match | Index order changed; switch to a fixed `address` |
 | Want to watch the algorithm | Expand the log in the Web panel, or use `esphome logs` to see each 5 s speed decision |
 
 ## Local closed loop vs. HA automations

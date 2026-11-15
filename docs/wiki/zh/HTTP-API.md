@@ -18,6 +18,8 @@
 | 方法 | `GET` 读状态，`POST` 执行动作 |
 
 > `entity_name` 是 YAML 里的名字，**不是** HA 里的 `entity_id`。HA 里重命名实体不会改变 API 路径。
+>
+> 本页示例按**中文版固件**（`firmware/zh/`）的实体名编写。英文版固件（`firmware/en/`，主推）的实体名为 `Fan 1`、`Fan 1 RPM`、`Temp A`、`Uptime` 等，把路径里的中文名换成对应英文名并做同样的 URL 编码即可（如 `/fan/Fan%201`），规则完全不变。
 
 ## 端点速查
 

@@ -61,7 +61,7 @@ Not on the same fan channel: they will overwrite each other, because the local c
 
 - Let the local closed loop handle basic cooling;
 - Let HA only "change parameters" (`T-Min`/`F-Max`) and send notifications;
-- If you want HA to take full control, set that channel's `FN-Src` to "未绑定" (unbound).
+- If you want HA to take full control, set that channel's `FN-Src` to "Unbound".
 
 ### Can the radar detect a stationary person?
 
@@ -72,6 +72,18 @@ No (current firmware). The anti-interference algorithm requires the distance to 
 The radar operates at 24 GHz, a different band from 2.4 GHz Wi-Fi, so interference is basically nil. What actually deserves attention is the 5V supply to the radar module and metal obstructions.
 
 ## Software and ecosystem
+
+### Which firmware should I flash — is my board single-core or dual-core?
+
+**Every controller sold after 2026-11-12 is dual-core**, and the active v2.0 builds are now compiled for dual-core operation, so the choice is no longer "which core" but "which feature set":
+
+| Situation | What to flash |
+|:-----|:-----|
+| Bought after 2026-11-12 (all units are dual-core) | A current v2.0 release: `v2.0-basic-en`, `v2.0-ds18b20-en` or `v2.0-ds18b20-radar-en` (`-zh` if you need the Chinese entity names) |
+| v1.0 board (legacy, any variant) | The archived v1.0 build under `firmware/en/archive/v1.0/` (`dual-core` or `single-core`) — not in Releases, compile it yourself |
+| Older **single-core** board (shipped before 2026-11-12) | A single-core build from `firmware/en/archive/v2.0/single-core/` (`basic`, `ds18b20`, `ds18b20-radar`) — not in Releases, compile it yourself |
+
+The rule is one-directional: a single-core board **cannot boot** dual-core firmware and needs the archived single-core build; a dual-core board can also run a single-core build (one core stays idle), but there is no reason to. Details in [Firmware versions](Firmware-EN#archived-builds) and [Getting started](Getting-Started-EN#choose-the-firmware-first).
 
 ### Can I use it without Home Assistant?
 
@@ -112,7 +124,7 @@ In `esp32pwm22810-a1b2c3`, `a1b2c3` is the last 3 bytes of this device's MAC add
 | Method | Effect |
 |:-----|:-----|
 | Delete the ESPHome entry in HA and re-add it | Resets only the HA side; the device is unchanged |
-| Flash `.firmware.factory.bin` over USB (`0x0`) | Resets the application and partition table; Wi-Fi and parameters are erased |
+| Flash `.firmware.factory.bin` over USB (`0x0`) | Resets the application and partition table; Wi-Fi and parameters are erased. On an older single-core board, use a factory image built from the archived single-core config |
 | `esptool.py erase_flash` and then reflash | Wipes everything (including NVS) |
 | Clear parameters only | Just set the parameters back to their defaults in HA/Web |
 
