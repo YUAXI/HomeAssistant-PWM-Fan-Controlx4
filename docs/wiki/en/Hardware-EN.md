@@ -4,6 +4,8 @@
 
 ![PCB photo](https://raw.githubusercontent.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/master/docs/images/hardware/pcb.jpg)
 
+![Board interface map](https://raw.githubusercontent.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/master/docs/images/hardware/interface-map-en.webp)
+
 ## Differences between v1.0 and v2.0
 
 Both revisions share the same MCU and fan circuitry; v2.0 adds a 1-Wire temperature interface and a cleaner expansion header:

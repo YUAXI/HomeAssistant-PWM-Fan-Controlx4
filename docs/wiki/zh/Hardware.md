@@ -4,6 +4,8 @@
 
 ![PCB 实物](https://raw.githubusercontent.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/master/docs/images/hardware/pcb.jpg)
 
+![接口分布图](https://raw.githubusercontent.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/master/docs/images/hardware/interface-map-zh.webp)
+
 ## v1.0 与 v2.0 的差异
 
 两版共用同一套主控与风扇电路，v2.0 增加了 1-Wire 温度接口与更规范的扩展排针：

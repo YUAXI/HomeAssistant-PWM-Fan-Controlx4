@@ -27,6 +27,12 @@ An ESPHome-based 4-channel PWM fan controller with Home Assistant integration, a
   </table>
 </div>
 
+<p align="center">
+  <img src="./docs/images/hardware/interface-map-en.webp" width="900" alt="ESP32 4-channel PWM fan controller interface map"/>
+</p>
+
+<p align="center"><em>Board layout: ESP32 MCU, Type-C firmware/debug port, 12V DC jack, 4-pin custom header, four fan ports (FAN1–FAN4) and the 3-pin temperature-sensor terminal.</em></p>
+
 ## Documentation / Wiki
 
 Beyond this README, the project ships a complete bilingual wiki:

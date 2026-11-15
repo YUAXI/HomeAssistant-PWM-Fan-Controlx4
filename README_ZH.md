@@ -23,6 +23,12 @@
   </table>
 </div>
 
+<p align="center">
+  <img src="./docs/images/hardware/interface-map-zh.webp" width="900" alt="ESP32 4 路 PWM 风扇控制器接口分布图"/>
+</p>
+
+<p align="center"><em>接口分布：ESP32 主控、Type-C 固件刷写/调试口、12V DC 供电座、4Pin 自定义扩展排针、4 路风扇接口（FAN1–FAN4）以及 3Pin 温度传感器接线端子。</em></p>
+
 ## 文档与 Wiki
 
 除本 README 外，项目还提供一套完整的中英双语 Wiki：
