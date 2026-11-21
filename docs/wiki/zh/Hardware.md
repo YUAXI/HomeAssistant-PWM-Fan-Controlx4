@@ -13,7 +13,7 @@
 | 项目 | v1.0 | v2.0 |
 |:-----|:-----|:-----|
 | 风扇通道 | 4 × 4PIN | 4 × 4PIN |
-| DC 输入座 | DC-044A（5.5×2.1mm） | 同 |
+| DC 输入座 | 5.5×2.5mm（5525） | 同 |
 | 主控 | ESP32-WROOM-32-N4 | 同 |
 | USB 串口 | CH340C + Type-C 16PIN | 同 |
 | 风扇电源开关 | 4 × TPS22810DBVR | 同 |
@@ -83,7 +83,7 @@ USB-C 5V ──→ CH340C（仅串口，不经负载开关；不能驱动风扇�
 | U2 | AMS1117-3.3 | 5V → 3.3V LDO | C5250992 |
 | U6/U8/U10/U12 | TPS22810DBVR ×4 | 风扇电源负载开关（真正断电） | C205990 |
 | U5 | CH340C | USB 转串口 | C84681 |
-| U14 | DC-044A-A200 | 12V 输入 DC 座 | C720575 |
+| DC1 | 5525 DC 座（5.5×2.5mm） | 12V 输入 DC 座 | — |
 | USB1 | TYPE-C 16PIN 2MD | 刷写/调试口 | C2765186 |
 | D1–D3 | SS34 | 续流/防反 | C8678 |
 | Q4/Q6 | S8050 | CH340C 自动下载电路（EN / IO0） | C3014350 |
@@ -95,6 +95,8 @@ USB-C 5V ──→ CH340C（仅串口，不经负载开关；不能驱动风扇�
 | SW1/SW2 | TS-1088 轻触按键 | RST / BOOT | C720477 |
 
 完整 BOM：[v2.0 bom.xlsx](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/hardware/v2.0/pcb/bom.xlsx) · [v1.0 bom.xlsx](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/hardware/v1.0/pcb/bom.xlsx)
+
+> **DC 座说明：** 可下载的 BOM 仍列出旧款 `DC-044A-A200`（5.5×2.1mm）；当前成品的供电接口为 **5.5×2.5mm（5525）**，采购/打样时请按实物选用 5525 插座。
 
 ## 风扇接口（标准 4PIN）
 

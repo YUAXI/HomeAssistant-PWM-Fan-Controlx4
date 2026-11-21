@@ -12,7 +12,7 @@ This page covers the whole flow from unboxing to seeing 4 fans in Home Assistant
 |:-----|:-----|
 | Controller board | v1.0 or v2.0, ESP32 module pre-installed |
 | Fan connectors | 4 standard 4-pin fan headers (12V / GND / Tach / PWM) |
-| DC power jack | 5.5×2.1 mm, 12V input |
+| DC power jack | 5.5×2.5 mm (5525), 12V input |
 | Type-C port | 5V, flashing and debugging only, **cannot drive the fans** |
 
 ### Power requirements

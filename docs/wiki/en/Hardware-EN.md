@@ -13,7 +13,7 @@ Both revisions share the same MCU and fan circuitry; v2.0 adds a 1-Wire temperat
 | Item | v1.0 | v2.0 |
 |:-----|:-----|:-----|
 | Fan channels | 4 × 4PIN | 4 × 4PIN |
-| DC input jack | DC-044A (5.5×2.1mm) | Same |
+| DC input jack | 5.5×2.5 mm (5525) | Same |
 | MCU | ESP32-WROOM-32-N4 | Same |
 | USB serial | CH340C + Type-C 16PIN | Same |
 | Fan power switches | 4 × TPS22810DBVR | Same |
@@ -83,7 +83,7 @@ Current budget (12V side):
 | U2 | AMS1117-3.3 | 5V → 3.3V LDO | C5250992 |
 | U6/U8/U10/U12 | TPS22810DBVR ×4 | Fan power load switches (true power-off) | C205990 |
 | U5 | CH340C | USB-to-serial | C84681 |
-| U14 | DC-044A-A200 | 12V input DC jack | C720575 |
+| DC1 | 5525 DC jack (5.5×2.5mm) | 12V input DC jack | — |
 | USB1 | TYPE-C 16PIN 2MD | Flashing/debug port | C2765186 |
 | D1–D3 | SS34 | Freewheeling / reverse protection | C8678 |
 | Q4/Q6 | S8050 | CH340C auto-download circuit (EN / IO0) | C3014350 |
@@ -95,6 +95,8 @@ Current budget (12V side):
 | SW1/SW2 | TS-1088 tactile switches | RST / BOOT | C720477 |
 
 Full BOM: [v2.0 bom.xlsx](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/hardware/v2.0/pcb/bom.xlsx) · [v1.0 bom.xlsx](https://github.com/YUAXI/HomeAssistant-PWM-Fan-Controlx4/blob/master/hardware/v1.0/pcb/bom.xlsx)
+
+> **DC jack note:** the downloadable BOM still lists the older `DC-044A-A200` (5.5×2.1 mm); current controllers use a **5.5×2.5 mm (5525)** DC jack, so order the 5525 part to match the hardware.
 
 ## Fan connector (standard 4PIN)
 

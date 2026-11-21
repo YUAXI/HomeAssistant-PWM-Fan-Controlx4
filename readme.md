@@ -164,7 +164,7 @@ Note: with the suffix enabled, `name` is limited to 24 characters (the ESPHome h
 
 | Power Method | Interface | Voltage | Description |
 |:-------------|:----------|:--------|:------------|
-| **DC jack (recommended)** | DC barrel jack | 12V / 2A or higher | Normal operation; powers the fans and ESP32 |
+| **DC jack (recommended)** | DC barrel jack, 5.5×2.5 mm (5525) | 12V / 2A or higher | Normal operation; powers the fans and ESP32 |
 | Type-C port | USB-C | 5V | Flashing and debugging only; cannot drive the fans normally |
 
 ### 2.2 First-time Wi-Fi Setup
