@@ -2,9 +2,6 @@
 
 <p align="center"><a href="readme.md">English</a> · <a href="README_ZH.md">中文</a></p>
 
-<p align="center">
-  <a href="https://www.tindie.com/stores/esphome-fan-controllers/?ref=offsite_badges&utm_source=sellers_yuaxi&utm_medium=badges&utm_campaign=badge_medium"><img src="https://static.tindie.com/badges/tindie-mediums.png" alt="I sell on Tindie" width="150" height="78"></a>
-</p>
 
 > **English is the primary language of this repository.** Firmware configurations
 > are maintained in English first ([`firmware/en/`](./firmware/en/)), with a
