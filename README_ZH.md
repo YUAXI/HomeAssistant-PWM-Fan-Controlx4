@@ -2,11 +2,6 @@
 
 <p align="center"><a href="readme.md">English</a> · <a href="README_ZH.md">中文</a></p>
 
-<p align="center">
-  <a href="https://www.tindie.com/products/esphome-fan-controllers/esp32-4-channel-pwm-fan-controller-homeassistant/">
-    <strong>🛒 前往 Tindie 购买成品 ESP32 4 路 PWM 风扇控制器 →</strong>
-  </a>
-</p>
 
 > **本仓库以英文为首选语言。** 固件配置以英文版（[`firmware/en/`](./firmware/en/)）为准，中文版（[`firmware/zh/`](./firmware/zh/)）功能完全一致，仅实体名称不同。英文文档见 [`readme.md`](./readme.md)。
 
